@@ -33,5 +33,11 @@ class GroupMemberAdmin(admin.ModelAdmin):
 @admin.register(PayingState)
 class PayingStateAdmin(admin.ModelAdmin):
     list_display = ("group", "current_paying_member")
+    actions = ["advance_paying_member_action"]
 
+    @admin.action(description="Advance to next payer")
+    def advance_paying_member_action(self, request, queryset):
+        for state in queryset:
+            state.advance_paying_member()
+        self.message_user(request, "Turn advanced successfully.")
 

@@ -51,6 +51,13 @@ class PayingState(models.Model):
     group = models.OneToOneField(PayingQueueGroup, on_delete=models.CASCADE, related_name="paying_state")
     current_paying_member = models.ForeignKey(GroupMember, on_delete=models.SET_NULL, null=True, blank=True)
 
+    def advance_paying_member(self):
+        members = list(self.group.members.all())
+        current_index = members.index(self.current_paying_member)
+        next_index = (current_index + 1) % len(members)
+        self.current_paying_member = members[next_index]
+        self.save()
+
     def __str__(self):
         if self.current_paying_member:
             return f"Current paying member in group {self.group.code}: {self.current_paying_member.user.username}."
