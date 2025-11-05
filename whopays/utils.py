@@ -2,7 +2,8 @@ from .models import GroupMember
 
 
 def normalize_order(group):
-    for index, member in enumerate(group.members.all(), start=1):
+    members = group.members.all()
+    for index, member in enumerate(members, start=1):
         if member.order != index:
             member.order = index
-    GroupMember.objects.bulk_update(group.members.all(), ["order"])
+    GroupMember.objects.bulk_update(members, ["order"])
