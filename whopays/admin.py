@@ -1,6 +1,7 @@
 from django.contrib import admin
 from .models import PayingQueueGroup, GroupMember, PayingState
 
+
 class GroupMemberInline(admin.TabularInline):
     model = GroupMember
     extra = 0
@@ -17,7 +18,7 @@ class PayingQueueGroupAdmin(admin.ModelAdmin):
     list_display = ("name", "owner")
     readonly_fields = ("code",)
     search_fields = ("name", "code", "owner__username")
-    inlines = [GroupMemberInline]
+    inlines = [GroupMemberInline, PayingStateInline]
 
     def get_inline_instances(self, request, obj=None):
         if obj is None:
