@@ -2,6 +2,7 @@ import string
 import random
 from django.db import models
 from django.contrib.auth.models import User
+from django.core.exceptions import ValidationError
 
 GROUP_CODE_LENGTH = 8
 
@@ -35,12 +36,19 @@ class GroupMember(models.Model):
 
     class Meta:
         ordering = ["order"]
+        constraints = [
+            models.UniqueConstraint(fields=["group", "user"], name="unique_member_per_group")
+        ]
+
+    def clean(self):
+        if GroupMember.objects.filter(group=self.group, user=self.user).exclude(pk=self.pk).exists():
+            raise ValidationError(f"{self.user.username} is already a member of this group.")
 
     def save(self, *args, **kwargs):
-        if self._state.adding:
-            if self.order == 0:
-                last_order = GroupMember.objects.filter(group=self.group).aggregate(models.Max("order"))["order__max"]
-                self.order = (last_order or 0) + 1
+        self.clean()
+        if self._state.adding and self.order == 0:
+            last_order = GroupMember.objects.filter(group=self.group).aggregate(models.Max("order"))["order__max"]
+            self.order = (last_order or 0) + 1
         super().save(*args, **kwargs)
 
     def __str__(self):
