@@ -2,7 +2,7 @@ import logging
 from rest_framework.test import APIRequestFactory, force_authenticate, APITestCase
 from whopays.models import PayingQueueGroup, GroupMember
 from django.contrib.auth.models import User
-from whopays.views import ReorderQueueAPIView
+from whopays.api_views import ReorderQueueAPIView
 
 
 logger = logging.getLogger(__name__)
