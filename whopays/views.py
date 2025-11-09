@@ -21,3 +21,16 @@ class ReorderQueueAPIView(APIView):
         GroupMember.objects.bulk_update(members, ["order"])
 
         return Response({"status": "success"})
+
+
+class SetCurrentPayingMember(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, code):
+        group = PayingQueueGroup.objects.get(code=code)
+        member_id = request.data.get("member_id")
+        member = group.members.get(id=member_id)
+        group.paying_state.current_paying_member = member
+        group.paying_state.save()
+
+        return Response({"status": "success",  "current_payer": member.user.username})
