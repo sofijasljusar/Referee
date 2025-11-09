@@ -3,3 +3,9 @@ body {
     color: white;
     font-family: 'Itim', cursive;
 }
+
+.input-box {
+    border: white 2px solid;
+    height: 45px;
+    border-radius: 16px;
+}
