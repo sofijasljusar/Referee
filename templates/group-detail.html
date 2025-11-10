@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% load static %}
+{%  block content %}
+    <div class="row justify-content-center my-5">
+        <div class="col-auto text-center">
+{#            <img src="{% static 'whopays/images/can-pay.png' %}" class="big-circle-box"> #}
+{#            <button class="btn btn-outline-light mt-5 big-button">ТРИНЬ-ТРИНЬ<br>ФІТЬ-ФІТЬ</button>#}
+            <img src="{% static 'whopays/images/cannot-pay.png' %}" class="big-circle-box"> 
+            <button class="btn btn-outline-light mt-5 big-button disabled ">ЧО ТИ<br>ПСІХУЄШ?</button>
+        </div>
+    </div>
+{% endblock content %}

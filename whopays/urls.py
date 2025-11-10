@@ -6,5 +6,6 @@ urlpatterns = [
     path('group/<str:code>/reorder/', api_views.ReorderQueueAPIView.as_view(), name='reorder_queue'),
     path('signup/', views.SignupView.as_view(), name='signup'),
     path('groups/', views.GroupsView.as_view(), name='groups'),
+    path('group/<str:code>/', views.GroupDetailView.as_view(), name='group-detail'),
 
 ]

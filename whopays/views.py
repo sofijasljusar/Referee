@@ -7,3 +7,7 @@ class SignupView(TemplateView):
 
 class GroupsView(TemplateView):
     template_name = "groups.html"
+
+
+class GroupDetailView(TemplateView):
+    template_name = "group-detail.html"

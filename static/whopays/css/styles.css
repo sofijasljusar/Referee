@@ -1,7 +1,7 @@
 body {
     background-color: black;
     color: white;
-    font-family: 'Itim', cursive;
+    font-family: "Comfortaa", sans-serif;
     font-size: 24px;
 }
 
@@ -29,5 +29,19 @@ body {
 
 .bigger-text {
   font-size: 40px;
-  line-height: 40px;
+}
+
+.big-circle-box {
+  height: 350px;
+  width: 350px;
+  border-radius: 50%;
+}
+
+.big-button {
+    height: 150px;
+    width: 220px;
+    border: 2px white solid;
+    border-radius: 24px;
+    font-weight: bold;
+    font-size: 24px;
 }
