@@ -2,10 +2,32 @@ body {
     background-color: black;
     color: white;
     font-family: 'Itim', cursive;
+    font-size: 24px;
 }
 
 .input-box {
     border: white 2px solid;
     height: 45px;
     border-radius: 16px;
+}
+
+.circle-box {
+  border: 2px solid white;
+  height: 120px;
+  width: 120px;
+  border-radius: 50%;
+}
+
+.dashed-circle-box {
+    height: 120px;
+    width: 120px;
+    background-image: url('/static/whopays/images/dashed-circle.png');
+    background-size: cover;
+    background-position: center;
+    position: relative;
+}
+
+.bigger-text {
+  font-size: 40px;
+  line-height: 40px;
 }
