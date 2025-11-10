@@ -1,12 +1,69 @@
 {% extends "base.html" %}
 {% load static %}
 {%  block content %}
+    
+    <div class="position-fixed top-0 end-0 m-3">
+        <button class="btn" id="settingsToggle" style="color: white;  font-size: 32px">
+            &#9776;
+        </button>
+    </div>
+    
+    <div id="overlay" class="menu-overlay"></div>
+    
+    <div id="settingsDrawer" class="settings-drawer text-white py-4 text-center">
+        
+        <h6 class="mb-3">Group code</h6>
+        <span id="groupCode">ABCD1234</span>
+        <h6 class="mt-5 mb-3">Members</h6>
+        <ul id="memberList" class="list-group-flush pb-3">
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Alice
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center current-payer">
+                Bob
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Candy
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                Derek
+            </li>
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                +
+            </li>
+        </ul>
+        <div class="mx-auto text-center w-75">
+            <button class="btn btn-outline-light mb-3 w-100">Change current payer</button>
+            <button class="btn btn-outline-light mb-3 w-100">Reorder Queue</button>
+        </div>
+        
+    </div>
+
     <div class="row justify-content-center my-5">
         <div class="col-auto text-center">
-{#            <img src="{% static 'whopays/images/can-pay.png' %}" class="big-circle-box"> #}
-{#            <button class="btn btn-outline-light mt-5 big-button">ТРИНЬ-ТРИНЬ<br>ФІТЬ-ФІТЬ</button>#}
-            <img src="{% static 'whopays/images/cannot-pay.png' %}" class="big-circle-box"> 
-            <button class="btn btn-outline-light mt-5 big-button disabled ">ЧО ТИ<br>ПСІХУЄШ?</button>
+            <img src="{% static 'whopays/images/can-pay.png' %}" class="big-circle-box"> 
+            <button class="btn btn-outline-light mt-5 big-button">ТРИНЬ-ТРИНЬ<br>ФІТЬ-ФІТЬ</button>
+{#            <img src="{% static 'whopays/images/cannot-pay.png' %}" class="big-circle-box">#}
+{#            <button class="btn btn-outline-light mt-5 big-button disabled ">ЧО ТИ<br>ПСІХУЄШ?</button>#}
         </div>
     </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const drawer = document.getElementById("settingsDrawer");
+    const toggleBtn = document.getElementById("settingsToggle");
+    const overlay = document.getElementById("overlay");
+    
+    toggleBtn.addEventListener("click", () => {
+        drawer.classList.toggle("open");
+        overlay.classList.add("show");
+    });
+
+    overlay.addEventListener("click", () => {
+        drawer.classList.remove("open");
+        overlay.classList.remove("show");
+    });
+});
+</script>
+    
 {% endblock content %}
