@@ -1,0 +1,33 @@
+<div class="position-fixed top-0 end-0 m-3">
+        <button class="btn" id="settingsToggle">
+            <svg xmlns="http://www.w3.org/2000/svg" height="32px" viewBox="0 -960 960 960" width="32px" fill="#fff">
+                <path d="M120-240v-66.67h720V-240H120Zm0-206.67v-66.66h720v66.66H120Zm0-206.66V-720h720v66.67H120Z">
+                </path>
+            </svg>
+        </button>
+    </div>
+    
+<div id="overlay" class="menu-overlay"></div>
+    
+<div id="settingsDrawer" class="settings-drawer text-white py-4 text-center">
+    {% block menu_content %}{% endblock menu_content %}
+</div>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    const drawer = document.getElementById("settingsDrawer");
+    const toggleBtn = document.getElementById("settingsToggle");
+    const overlay = document.getElementById("overlay");
+    
+    toggleBtn.addEventListener("click", () => {
+        drawer.classList.toggle("open");
+        overlay.classList.add("show");
+    });
+
+    overlay.addEventListener("click", () => {
+        drawer.classList.remove("open");
+        overlay.classList.remove("show");
+    });
+});
+</script>
