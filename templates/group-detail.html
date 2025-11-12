@@ -3,8 +3,11 @@
 {%  block content %}
     
     <div class="position-fixed top-0 end-0 m-3">
-        <button class="btn" id="settingsToggle" style="color: white;  font-size: 32px">
-            &#9776;
+        <button class="btn" id="settingsToggle">
+            <svg xmlns="http://www.w3.org/2000/svg" height="32px" viewBox="0 -960 960 960" width="32px" fill="#fff">
+                <path d="M120-240v-66.67h720V-240H120Zm0-206.67v-66.66h720v66.66H120Zm0-206.66V-720h720v66.67H120Z">
+                </path>
+            </svg>
         </button>
     </div>
     
@@ -28,9 +31,9 @@
             <li class="list-group-item d-flex justify-content-between align-items-center">
                 Derek
             </li>
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                +
-            </li>
+{#            <li class="list-group-item d-flex justify-content-between align-items-center">#}
+{#                +#}
+{#            </li>#}
         </ul>
         <div class="mx-auto text-center w-75">
             <button class="btn btn-outline-light mb-3 w-100">Change current payer</button>

@@ -9,6 +9,16 @@ body {
     border: white 2px solid;
     height: 45px;
     border-radius: 16px;
+    background-color: black;
+    padding-left: 15px;
+    width: 100%;
+    font-size: 18px;
+    color: white;
+}
+
+.input-box:focus {
+    outline: none;      /* removes default blue outline */
+    /*box-shadow: 0 0 5px 2px #fff;*/
 }
 
 .circle-box {
@@ -90,4 +100,18 @@ body {
 .menu-overlay.show {
   opacity: 1;
   visibility: visible;
+}
+
+.link {
+  font-size: 16px;
+  color: white;
+}
+
+.link:hover {
+  color: white;
+  text-decoration: underline;
+}
+
+.text-danger.tiny-text {
+    font-size: 12px !important;
 }
