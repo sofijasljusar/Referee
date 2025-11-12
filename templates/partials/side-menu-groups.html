@@ -1,0 +1,29 @@
+{% extends "partials/side-menu.html" %}
+
+{% block menu_content %}
+    <h6 class="mb-3">Hello,</h6>
+    <span id="groupCode">{{ request.user.username }}</span>
+{#    <h6 class="mt-5 mb-3">Members</h6>#}
+{#    <ul id="memberList" class="list-group-flush pb-3">#}
+{#        <li class="list-group-item d-flex justify-content-between align-items-center">#}
+{#            Alice#}
+{#        </li>#}
+{#        <li class="list-group-item d-flex justify-content-between align-items-center current-payer">#}
+{#            Bob#}
+{#        </li>#}
+{#        <li class="list-group-item d-flex justify-content-between align-items-center">#}
+{#            Candy#}
+{#        </li>#}
+{#        <li class="list-group-item d-flex justify-content-between align-items-center">#}
+{#            Derek#}
+{#        </li>#}
+{#        <li class="list-group-item d-flex justify-content-between align-items-center">#}
+{#            +#}
+{#        </li>#}
+{#    </ul>#}
+    <div class="mx-auto text-center w-75 mt-3">
+        <button class="btn btn-outline-light mb-3 w-100">Settings</button>
+        <button class="btn btn-outline-light mb-3 w-100">Log out</button>
+    </div>
+    
+{% endblock menu_content %}
