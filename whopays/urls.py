@@ -1,8 +1,9 @@
 from django.urls import path
-
 from . import api_views, views
+from django.views.generic import RedirectView
 
 urlpatterns = [
+    path('', RedirectView.as_view(pattern_name='groups', permanent=False)),
     path('signup/', views.SignUpView.as_view(), name='signup'),
     path('login/', views.LogInView.as_view(), name='login'),
     path('groups/', views.GroupsView.as_view(), name='groups'),

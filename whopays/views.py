@@ -3,6 +3,7 @@ from django.views.generic import CreateView
 from django.contrib.auth.views import LoginView
 from .forms import SignUpForm, LogInForm
 from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 class SignUpView(CreateView):
@@ -26,8 +27,7 @@ class LogInView(LoginView):
         return context
 
 
-
-class GroupsView(TemplateView):
+class GroupsView(LoginRequiredMixin, TemplateView):
     template_name = "groups.html"
 
 
