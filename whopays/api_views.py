@@ -10,8 +10,10 @@ class ReorderQueueAPIView(APIView):
 
     @transaction.atomic
     def post(self, request, code):
-        new_order = request.data.get("new_order", [])
         group = PayingQueueGroup.objects.get(code=code)
+        if group.owner != request.user:
+            return Response({"status": "error", "message": "Only owner can reorder queue."}, status=403)
+        new_order = request.data.get("new_order", [])
         members = group.members.all()
         order_map = {member_id: index for index, member_id in enumerate(new_order, start=1)}
 
@@ -28,6 +30,9 @@ class SetCurrentPayingMember(APIView):
 
     def post(self, request, code):
         group = PayingQueueGroup.objects.get(code=code)
+        if group.owner != request.user:
+            return Response({"status": "error", "message": "Only owner can set current payer."}, status=403)
+
         member_id = request.data.get("member_id")
         member = group.members.get(id=member_id)
         group.paying_state.current_paying_member = member

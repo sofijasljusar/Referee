@@ -9,7 +9,8 @@
     <ul id="memberList" class="list-group-flush pb-3">
         {% for member in members %}
             <li class="list-group-item d-flex justify-content-between align-items-center
-                {% if current_payer and member == current_payer %}current-payer{% endif %}">
+                {% if current_payer and member == current_payer %}current-payer{% endif %}"
+                data-member-id="{{ member.id }}">
                 {{ member.user.username }}
             </li>
         {% empty %}
@@ -20,8 +21,11 @@
 {#        </li>#}
     </ul>
     <div class="mx-auto text-center w-75">
-        <button class="btn btn-outline-light mb-3 w-100">Change current payer</button>
-        <button class="btn btn-outline-light mb-3 w-100">Reorder Queue</button>
+        {% if request.user == group.owner %}
+            <button class="btn btn-outline-light mb-3 w-100">Change current payer</button>
+            <button class="btn btn-outline-light mb-3 w-100">Reorder Queue</button>
+            <button class="btn btn-outline-light mb-3 w-100">Group Settings</button>
+        {% endif %}
     </div>
     
 {% endblock menu_content %}
