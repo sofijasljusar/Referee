@@ -7,9 +7,11 @@
     <div class="row row-cols-2 g-5 px-5 pt-5">
         {% for group in user_groups %}
             <div class="col d-flex flex-column align-items-center">
-                <div class="circle-box d-flex align-items-center justify-content-center">
-                    <span class="bigger-text">{{ group.emoji }}</span>
-                </div>
+                <a href="{% url 'group-detail' group.code %}" class="text-decoration-none">
+                    <div class="circle-box d-flex align-items-center justify-content-center">
+                        <span class="bigger-text">{{ group.emoji }}</span>
+                    </div>
+                </a>    
                 <span class="mt-1">{{ group.name }}</span>
             </div>
         {% endfor %}
