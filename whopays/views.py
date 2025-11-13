@@ -1,5 +1,5 @@
 from django.views.generic import TemplateView
-from django.views.generic import CreateView
+from django.views.generic import CreateView, DetailView
 from django.contrib.auth.views import LoginView
 from .forms import SignUpForm, LogInForm
 from django.urls import reverse_lazy
@@ -42,8 +42,23 @@ class GroupsView(LoginRequiredMixin, TemplateView):
         return context
 
 
-class GroupDetailView(TemplateView):
+class GroupDetailView(DetailView):
+    model = PayingQueueGroup
     template_name = "group-detail.html"
+    slug_field = "code"
+    slug_url_kwarg = "code"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        group = self.object
+        members = group.members.all()
+        current_payer = group.paying_state.current_paying_member
+        context.update({
+            "group": group,
+            "members": members,
+            "current_payer": current_payer
+        })
+        return context
 
 
 class SettingsView(TemplateView):
