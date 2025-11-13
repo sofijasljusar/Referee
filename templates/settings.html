@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% load static %}
+{%  block content %}
+    <div class="fullscreen-size row d-flex justify-content-center align-items-center position-relative">
+
+        {% include 'partials/back-button.html' %}
+        <div class="d-flex flex-column align-items-center gap-5">
+            <div id="colorPicker"></div>
+            <input type="hidden" id="themeColor" name="theme_color">
+        </div>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@5"></script>
+    <script>
+      const colorPicker = new iro.ColorPicker("#colorPicker", {
+        width: 340,
+        color: "{{ request.user.userprofile.theme_color|default:'#27DDF5' }}",
+        borderWidth: 1,
+        borderColor: "#fff"
+      });
+      
+      const csrfToken = "{{ csrf_token }}";
+      
+      colorPicker.on("color:change", function(color) {
+      const hex = color.hexString;
+      document.documentElement.style.setProperty('--theme-color', hex); // update live
+      
+      fetch("{% url 'update_theme_color' %}", {
+          method: "POST",
+          headers: {
+              "Content-Type": "application/json",
+              "X-CSRFToken": csrfToken
+          },
+          body: JSON.stringify({theme_color: hex})
+        });
+      });
+    </script>
+{% endblock content %}

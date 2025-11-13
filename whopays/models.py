@@ -70,3 +70,11 @@ class PayingState(models.Model):
         if self.current_paying_member:
             return f"Current paying member in group {self.group.code}: {self.current_paying_member.user.username}."
         return f"Currently group {self.group.code} has no paying member set."
+
+
+class UserProfile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    theme_color = models.CharField(max_length=7, default="#000000")
+
+    def __str__(self):
+        return f"{self.user.username} Profile"

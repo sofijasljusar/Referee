@@ -26,7 +26,16 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Itim&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&display=swap" rel="stylesheet">
-
+    <style>
+          :root {
+              {% if request.user.is_authenticated %}
+                --theme-color: {{ request.user.userprofile.theme_color|default:"#000000" }};
+              {% else %}
+                --theme-color: #000000;
+              {% endif %}
+          }
+          
+        </style>
 </head>
 
 <body>

@@ -2,6 +2,8 @@ from django.db.models.signals import post_save, post_delete,  pre_delete
 from django.dispatch import receiver
 from .models import PayingQueueGroup, GroupMember, PayingState
 from .utils import normalize_order
+from django.contrib.auth.models import User
+from .models import UserProfile
 
 @receiver(post_save, sender=PayingQueueGroup)
 def create_paying_state_for_group(sender, instance, created, **kwargs):
@@ -37,3 +39,9 @@ def advance_turn_before_deleting_member(sender, instance, **kwargs):
 def normalize_queue_after_deleting_member(sender, instance, **kwargs):
     group = instance.group
     normalize_order(group)
+
+
+@receiver(post_save, sender=User)
+def create_user_profile(sender, instance, created, **kwargs):
+    if created:
+        UserProfile.objects.create(user=instance)
