@@ -124,3 +124,8 @@ body {
 .text-danger.tiny-text {
     font-size: 12px !important;
 }
+
+.top-bar-item {
+    top: 1rem;   /* consistent distance from top */
+    position: absolute;
+}
