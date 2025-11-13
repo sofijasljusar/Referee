@@ -3,21 +3,43 @@
 
 {%  block content %}
     {% include 'partials/back-button.html' %}
-    
+
     <label class="top-bar-item start-50 translate-middle-x" style="height: 36px">{{ group.emoji }} {{ group.name }}</label>
-    
+
     {% include "partials/side-menu-group-detail.html" %}
-    
+
     <div class="row justify-content-center my-5">
         <div class="col-auto text-center">
             {% if current_payer and current_payer.user == request.user %}
                 <img src="{% static 'whopays/images/can-pay.png' %}" class="big-circle-box">
-                <button class="btn btn-outline-light mt-5 big-button">ТРИНЬ-ТРИНЬ<br>ФІТЬ-ФІТЬ</button>
+                <button id="advanceTurnBtn" class="btn btn-outline-light mt-5 big-button">ТРИНЬ-ТРИНЬ<br>ФІТЬ-ФІТЬ</button>
             {% else %}
                 <img src="{% static 'whopays/images/cannot-pay.png' %}" class="big-circle-box">
                 <button class="btn btn-outline-light mt-5 big-button disabled ">ЧО ТИ<br>ПСІХУЄШ?</button>
             {% endif %}
         </div>
     </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const btn = document.getElementById("advanceTurnBtn");
+        if (!btn) return;  // button does not exist for non-payers
     
+        btn.addEventListener("click", () => {
+            fetch("{% url 'api_advance_turn' group.code %}", {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}",
+                    "Content-Type": "application/json"
+                },
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    location.reload();
+                }
+            })
+        })
+    })
+    </script>
 {% endblock content %}

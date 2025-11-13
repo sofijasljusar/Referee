@@ -34,3 +34,22 @@ class SetCurrentPayingMember(APIView):
         group.paying_state.save()
 
         return Response({"status": "success",  "current_payer": member.user.username})
+
+
+class AdvanceTurnAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, code):
+        group = PayingQueueGroup.objects.get(code=code)
+        current_paying_member = group.paying_state.current_paying_member
+
+        if current_paying_member.user != request.user:
+            return Response({"status": "error", "message": "Only current paying member can advance turn."}, status=403)
+
+        group.paying_state.advance_paying_member()
+        new_current = group.paying_state.current_paying_member
+
+        return Response({
+            "status": "success",
+            "current_payer": new_current.user.username
+        })
