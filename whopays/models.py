@@ -3,6 +3,7 @@ import random
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
+from .utils import validate_single_emoji
 
 GROUP_CODE_LENGTH = 8
 
@@ -16,6 +17,13 @@ class PayingQueueGroup(models.Model):
     code = models.CharField(max_length=10, unique=True, blank=True)
     owner = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     name = models.CharField(max_length=100)
+    emoji = models.CharField(
+        max_length=15,
+        blank=True,
+        default="👥",
+        validators=[validate_single_emoji],
+        help_text="Add an emoji to represent this group."
+    )
 
     def save(self, *args, **kwargs):
         if not self.code:
