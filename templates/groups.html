@@ -3,6 +3,7 @@
 {%  block content %}
     
     {% include "partials/side-menu-groups.html" %}
+    {% include "partials/add-group-modal.html" %}
     
     <div class="row row-cols-2 g-5 px-5 pt-5">
         {% for group in user_groups %}
@@ -16,9 +17,12 @@
             </div>
         {% endfor %}
         <div class="col d-flex flex-column align-items-center">
-            <div class="dashed-circle-box d-flex align-items-center justify-content-center">
+            <button type="button"
+                class="dashed-circle-box"
+                data-bs-toggle="modal"
+                data-bs-target="#addGroupModal">
                 <span class="bigger-text">+</span>
-            </div>
+            </button>
         </div>
     </div>
 {% endblock content %}

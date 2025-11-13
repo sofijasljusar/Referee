@@ -44,6 +44,22 @@ body {
     background-size: cover;
     background-position: center;
     position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+}
+button.dashed-circle-box {
+    border: none;
+    background-color: transparent;
+    padding: 0;
+}
+button.dashed-circle-box:focus {
+    outline: none;
+    box-shadow: none;
 }
 
 .bigger-text {
@@ -128,4 +144,35 @@ body {
 .top-bar-item {
     top: 1rem;   /* consistent distance from top */
     position: absolute;
+}
+
+body.modal-open {
+    padding-right: 0 !important;
+}
+
+
+.modal-content {
+    background: var(--theme-color); /* transparent dark overlay */
+    border: 2px solid white;          /* white border */
+    border-radius: 12px;              /* keep Bootstrap’s rounded shape */
+    color: white;                     /* text becomes white */
+}
+
+.modal-header {
+    border-bottom: 1px solid white;
+}
+.modal-backdrop {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1040;
+}
+
+.custom-dialog {
+    transform: translateY(-10%) !important;
+    width: 70%;
+    margin: 0 auto;
 }
