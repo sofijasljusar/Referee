@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.http import JsonResponse
 import json
-from .models import UserProfile
+from .models import UserProfile, PayingQueueGroup
 
 
 class SignUpView(CreateView):
@@ -33,6 +33,13 @@ class LogInView(LoginView):
 
 class GroupsView(LoginRequiredMixin, TemplateView):
     template_name = "groups.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        user_groups = PayingQueueGroup.objects.filter(members__user=user).distinct()
+        context["user_groups"] = user_groups
+        return context
 
 
 class GroupDetailView(TemplateView):

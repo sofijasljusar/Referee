@@ -5,29 +5,18 @@
     {% include "partials/side-menu-groups.html" %}
     
     <div class="row row-cols-2 g-5 px-5 pt-5">
-        <div class="col d-flex flex-column align-items-center">
-            <div class="circle-box d-flex align-items-center justify-content-center">
-                <span class="bigger-text">☕</span>
+        {% for group in user_groups %}
+            <div class="col d-flex flex-column align-items-center">
+                <div class="circle-box d-flex align-items-center justify-content-center">
+                    <span class="bigger-text">{{ group.emoji }}</span>
+                </div>
+                <span class="mt-1">{{ group.name }}</span>
             </div>
-            <span class="mt-1">Coffee</span>
-        </div>
-        <div class="col d-flex flex-column align-items-center">
-            <div class="circle-box d-flex align-items-center justify-content-center">
-                <span class="bigger-text">🌊</span>
-            </div>
-            <span class="mt-1">Team</span>
-        </div>
-        <div class="col d-flex flex-column align-items-center">
-            <div class="circle-box d-flex align-items-center justify-content-center">
-                <span class="bigger-text">💘</span>
-            </div>
-            <span class="mt-1">Girls</span>
-        </div>
+        {% endfor %}
         <div class="col d-flex flex-column align-items-center">
             <div class="dashed-circle-box d-flex align-items-center justify-content-center">
                 <span class="bigger-text">+</span>
             </div>
         </div>
-
     </div>
 {% endblock content %}
