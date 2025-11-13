@@ -21,8 +21,13 @@ body {
 }
 
 .input-box:focus {
-    outline: none;      /* removes default blue outline */
+    outline: none;
     /*box-shadow: 0 0 5px 2px #fff;*/
+}
+
+.input-box::placeholder {
+  color: #eeeeee;
+  opacity: 1;
 }
 
 .circle-box {
