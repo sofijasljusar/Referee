@@ -5,11 +5,11 @@ from .forms import SignUpForm, LogInForm
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
-from django.http import JsonResponse, HttpResponseRedirect
+from django.http import JsonResponse
 import json
 from .models import UserProfile, PayingQueueGroup
 from django.shortcuts import redirect
-from django.urls import reverse
+from django.contrib import messages
 
 
 class SignUpView(CreateView):
@@ -90,6 +90,7 @@ class CreateNewGroupView(LoginRequiredMixin, View):
         emoji = request.POST.get("emoji", "").strip()
 
         if not name:
+            messages.error(request, "Group name cannot be blank.")
             return redirect("groups")
 
         group_data = {"owner": request.user, "name": name}
