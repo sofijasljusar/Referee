@@ -5,9 +5,11 @@ from .forms import SignUpForm, LogInForm
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseRedirect
 import json
 from .models import UserProfile, PayingQueueGroup
+from django.shortcuts import redirect
+from django.urls import reverse
 
 
 class SignUpView(CreateView):
@@ -80,3 +82,18 @@ class UpdateThemeColorView(LoginRequiredMixin, View):
             pass
 
         return JsonResponse({"status": "error"}, status=400)
+
+
+class CreateNewGroupView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        name = request.POST.get("name", "").strip()
+        emoji = request.POST.get("emoji", "").strip()
+
+        if not name:
+            return redirect("groups")
+
+        group_data = {"owner": request.user, "name": name}
+        if emoji:
+            group_data["emoji"] = emoji
+        PayingQueueGroup.objects.create(**group_data)
+        return redirect("groups")
