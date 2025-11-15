@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.http import JsonResponse
 import json
-from .models import UserProfile, PayingQueueGroup
+from .models import UserProfile, PayingQueueGroup, GroupMember
 from django.shortcuts import redirect
 from django.contrib import messages
 
@@ -97,4 +97,20 @@ class CreateNewGroupView(LoginRequiredMixin, View):
         if emoji:
             group_data["emoji"] = emoji
         PayingQueueGroup.objects.create(**group_data)
+        return redirect("groups")
+
+
+class JoinExistingGroupView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        code = request.POST.get("code", "").strip().upper()
+        try:
+            group = PayingQueueGroup.objects.get(code=code)
+        except PayingQueueGroup.DoesNotExist:
+            messages.error(request, "Group not found.")
+            return redirect("groups")
+        user = request.user
+        if not GroupMember.objects.filter(group=group, user=user).exists():
+            GroupMember.objects.create(group=group, user=user)
+        else:
+            messages.error(request, "You are already a member.")
         return redirect("groups")
