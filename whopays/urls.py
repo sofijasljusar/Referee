@@ -17,5 +17,6 @@ urlpatterns = [
     path('create-new-group/', views.CreateNewGroupView.as_view(), name='create-new-group'),
     path('join-existing-group/', views.JoinExistingGroupView.as_view(), name='join-existing-group'),
     path('group/<str:code>/leave/', views.LeaveGroupView.as_view(), name='leave-group'),
+    path('account/', views.EditUserView.as_view(), name='account'),
 
 ]

@@ -17,3 +17,18 @@ class SignUpForm(UserCreationForm):
 class LogInForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={"class": "mt-3 input-box", "placeholder": "Username"}))
     password = forms.CharField(widget=forms.PasswordInput(attrs={"class": "mt-3 input-box", "placeholder": "Password"}))
+
+
+class EditUserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ["username"]
+        help_texts = {
+            "username": None,
+        }
+        widgets = {
+            "username": forms.TextInput(attrs={
+                "class": "input-box",
+                "placeholder": "Username"
+            })
+        }

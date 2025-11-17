@@ -1,15 +1,15 @@
-from django.views.generic import TemplateView
-from django.views.generic import CreateView, DetailView
+from django.views.generic import TemplateView, CreateView, DetailView, UpdateView, View
 from django.contrib.auth.views import LoginView
 from .forms import SignUpForm, LogInForm
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views import View
 from django.http import JsonResponse
 import json
 from .models import UserProfile, PayingQueueGroup, GroupMember
 from django.shortcuts import redirect
 from django.contrib import messages
+from django.contrib.auth.models import User
+from .forms import EditUserForm
 
 
 class SignUpView(CreateView):
@@ -121,3 +121,19 @@ class LeaveGroupView(LoginRequiredMixin, View):
         group = PayingQueueGroup.objects.get(code=code)
         GroupMember.objects.filter(group=group, user=request.user).delete()
         return redirect("groups")
+
+
+class EditUserView(LoginRequiredMixin, UpdateView):
+    model = User
+    form_class = EditUserForm
+    template_name = "edit-user.html"
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def form_valid(self, form):
+        messages.success(self.request, "Account updated successfully!")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return self.request.path
