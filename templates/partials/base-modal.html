@@ -1,0 +1,23 @@
+<div class="modal fade" id="{{modal_id}}Modal" tabindex="-1" aria-labelledby="{{modal_id}}ModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered custom-dialog">
+    <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="{{modal_id}}ModalLabel">
+              {% block modal_title %}{% endblock %}
+          </h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          {% block modal_body %}{% endblock %}
+        </div>
+    
+        {% block modal_footer %}
+            <div class="modal-footer">
+              <button type="submit" class="btn btn-outline-light" form="{{ modal_id }}Form">Save</button>
+            </div>
+        {% endblock %}
+    </div>
+  </div>
+</div>

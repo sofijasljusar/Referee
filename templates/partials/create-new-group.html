@@ -1,29 +1,18 @@
-<div class="modal fade" id="createNewGroupModal" tabindex="-1" aria-labelledby="createNewGroupModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered custom-dialog">
-    <div class="modal-content">
+{% extends "partials/base-modal.html" %}
 
-        <div class="modal-header">
-          <h5 class="modal-title" id="createNewGroupModalLabel">Create a New Group</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
+{% block modal_title %}Create a New Group{% endblock %}
 
-        <div class="modal-body">
-          <div class="d-flex flex-column align-items-center">
-            <form method="POST" action="{% url 'create-new-group' %}" id="createNewGroupForm">
-              {% csrf_token %}
-                <div class="d-flex flex-column gap-3">
-                  <label for="groupName" class="visually-hidden form-label tiny-text">Group Name:</label>
-                  <input placeholder="Group Name" type="text" class="input-box" id="groupName" name="name" required>
-                  <label for="groupEmoji" class="visually-hidden form-label tiny-text">Group Emoji:</label>
-                  <input placeholder="Group Emoji" type="text" class="input-box" id="groupEmoji" name="emoji">
-                </div>
-            </form>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button type="submit" class="btn btn-outline-light" form="createNewGroupForm">Save</button>
-        </div>
-
+{% block modal_body %}
+    <div class="d-flex flex-column align-items-center">
+        <form method="POST" action="{% url 'create-new-group' %}" id="{{ modal_id }}Form">
+          {% csrf_token %}
+            <div class="d-flex flex-column gap-3">
+              <label for="groupName" class="visually-hidden form-label tiny-text">Group Name:</label>
+              <input placeholder="Group Name" type="text" class="input-box" id="groupName" name="name" required>
+              <label for="groupEmoji" class="visually-hidden form-label tiny-text">Group Emoji:</label>
+              <input placeholder="Group Emoji" type="text" class="input-box" id="groupEmoji" name="emoji">
+            </div>
+        </form>
     </div>
-  </div>
-</div>
+{% endblock %}
+        
