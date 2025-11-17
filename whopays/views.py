@@ -137,3 +137,9 @@ class EditUserView(LoginRequiredMixin, UpdateView):
 
     def get_success_url(self):
         return self.request.path
+
+
+class DeleteUserView(LoginRequiredMixin, View):
+    def post(self, request):
+        request.user.delete()
+        return redirect("login")

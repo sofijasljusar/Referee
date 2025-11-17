@@ -1,18 +1,18 @@
 {% extends "partials/base-modal.html" %}
 
-{% block modal_title %}Leave Group{% endblock %}
+{% block modal_title %}Delete Account{% endblock %}
 
 {% block modal_body %}
     <p class="text-center font-20">
-          Are you sure you want to leave {{ group.emoji }} <strong>{{ group.name }}</strong>?
+          Are you sure you want to delete your account?
     </p>
 {% endblock %}
 
 {% block modal_footer %}
 <div class="modal-footer">
-    <form method="POST" action="{% url 'leave-group' group.code %}">
+    <form method="POST" action="{% url 'delete-account' %}">
         {% csrf_token %}
-        <button type="submit" class="btn btn-danger">Yes, Leave</button>
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
     </form>
     <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
 </div>
