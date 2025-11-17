@@ -9,16 +9,21 @@
     {% include "partials/side-menu-group-detail.html" %}
 
     <div class="row justify-content-center my-5">
-        <div class="col-auto text-center">
-            {% if current_payer and current_payer.user == request.user %}
-                <img src="{% static 'whopays/images/can-pay.png' %}" class="big-circle-box">
-                <button id="advanceTurnBtn" class="btn btn-outline-light mt-5 big-button">ТРИНЬ-ТРИНЬ<br>ФІТЬ-ФІТЬ</button>
-            {% else %}
-                <img src="{% static 'whopays/images/cannot-pay.png' %}" class="big-circle-box">
-                <button class="btn btn-outline-light mt-5 big-button disabled ">ЧО ТИ<br>ПСІХУЄШ?</button>
-            {% endif %}
-        </div>
+    <div class="col-12 d-flex flex-column align-items-center text-center">
+        {% if current_payer and current_payer.user == request.user %}
+            <img src="{% static 'whopays/images/can-pay.png' %}" class="big-circle-box">
+            <button id="advanceTurnBtn" class="btn btn-outline-light mt-5 big-button">
+                ТРИНЬ-ТРИНЬ<br>ФІТЬ-ФІТЬ
+            </button>
+        {% else %}
+            <img src="{% static 'whopays/images/cannot-pay.png' %}" class="big-circle-box">
+            <button class="btn btn-outline-light mt-5 big-button disabled">
+                ЧО ТИ<br>ПСІХУЄШ?
+            </button>
+        {% endif %}
     </div>
+</div>
+
 
     <script>
     document.addEventListener("DOMContentLoaded", () => {
