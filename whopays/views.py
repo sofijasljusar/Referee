@@ -147,5 +147,13 @@ class EditUserView(LoginRequiredMixin, UpdateView):
 
 class DeleteUserView(LoginRequiredMixin, View):
     def post(self, request):
-        request.user.delete()
+        user = request.user
+
+        GroupMember.objects.filter(user=user).delete()
+
+        for group in PayingQueueGroup.objects.filter(owner=user):
+            pass_ownership(group)
+
+        user.delete()
+
         return redirect("login")
