@@ -62,7 +62,7 @@ button.dashed-circle-box:focus {
     box-shadow: none;
 }
 
-.bigger-text {
+.font-40 {
   font-size: 40px;
 }
 
@@ -137,7 +137,7 @@ button.dashed-circle-box:focus {
   text-decoration: underline;
 }
 
-.text-danger.tiny-text {
+.font-12 {
     font-size: 12px !important;
 }
 
@@ -173,10 +173,21 @@ body.modal-open {
 
 .custom-dialog {
     transform: translateY(-10%) !important;
-    width: 70%;
     margin: 0 auto;
 }
 
-.smaller-text {
+.font-20 {
     font-size: 20px;
+}
+
+.w-70 {
+    width: 70%;
+}
+
+.font-16 {
+  font-size: 16px;
+}
+
+.font-18 {
+  font-size: 18px;
 }

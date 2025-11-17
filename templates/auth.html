@@ -17,13 +17,13 @@
             {% csrf_token %}
             {% if form.non_field_errors %}
                 {% for error in form.non_field_errors %}
-                    <div class="text-danger tiny-text mb-1">{{ error }}</div>
+                    <div class="text-danger font-12 mb-1">{{ error }}</div>
                 {% endfor %}
             {% endif %}
             {% for field in form %}
                 {{ field }}
                 {%  if field.errors %}
-                    <div class="text-danger tiny-text mt-1">{{ field.errors.0 }}</div>
+                    <div class="text-danger font-12 mt-1">{{ field.errors.0 }}</div>
                 {% endif %}
             {% endfor %}
 
