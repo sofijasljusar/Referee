@@ -14,3 +14,14 @@ def normalize_order(group):
 def validate_single_emoji(value):
     if len(regex.findall(r'\X', value)) != 1:
         raise ValidationError("Please enter exactly one emoji.")
+
+
+def pass_ownership(group):
+    remaining_members = list(group.members.all())
+
+    if not remaining_members:
+        group.delete()
+        return
+
+    group.owner = remaining_members[0].user
+    group.save()

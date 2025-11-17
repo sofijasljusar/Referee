@@ -10,6 +10,7 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from .forms import EditUserForm
+from .utils import pass_ownership
 
 
 class SignUpView(CreateView):
@@ -119,7 +120,12 @@ class JoinExistingGroupView(LoginRequiredMixin, View):
 class LeaveGroupView(LoginRequiredMixin, View):
     def post(self, request, code):
         group = PayingQueueGroup.objects.get(code=code)
-        GroupMember.objects.filter(group=group, user=request.user).delete()
+        user = request.user
+        GroupMember.objects.filter(group=group, user=user).delete()
+
+        if user == group.owner:
+            pass_ownership(group)
+
         return redirect("groups")
 
 
