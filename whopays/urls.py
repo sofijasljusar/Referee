@@ -16,5 +16,6 @@ urlpatterns = [
     path('group/<str:code>/advance-turn/', api_views.AdvanceTurnAPIView.as_view(), name='api_advance_turn'),
     path('create-new-group/', views.CreateNewGroupView.as_view(), name='create-new-group'),
     path('join-existing-group/', views.JoinExistingGroupView.as_view(), name='join-existing-group'),
+    path('group/<str:code>/leave/', views.LeaveGroupView.as_view(), name='leave-group'),
 
 ]

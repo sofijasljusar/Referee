@@ -114,3 +114,10 @@ class JoinExistingGroupView(LoginRequiredMixin, View):
         else:
             messages.error(request, "You are already a member.")
         return redirect("groups")
+
+
+class LeaveGroupView(LoginRequiredMixin, View):
+    def post(self, request, code):
+        group = PayingQueueGroup.objects.get(code=code)
+        GroupMember.objects.filter(group=group, user=request.user).delete()
+        return redirect("groups")

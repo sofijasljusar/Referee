@@ -176,3 +176,7 @@ body.modal-open {
     width: 70%;
     margin: 0 auto;
 }
+
+.smaller-text {
+    font-size: 20px;
+}
