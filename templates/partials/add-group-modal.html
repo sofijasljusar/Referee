@@ -4,8 +4,8 @@
 
 {% block modal_body %}
     <div class="mb-3 d-flex flex-column align-items-center gap-3">
-    <button class="btn btn-outline-light w-100" data-bs-toggle="modal" data-bs-target="#createNewGroupModal" data-bs-dismiss="modal">Create a New Group</button>
-    <button class="btn btn-outline-light w-100" data-bs-toggle="modal" data-bs-target="#joinExistingGroupModal" data-bs-dismiss="modal">Join an Existing Group</button>
+    <button class="btn btn-outline-light w-100" data-bs-toggle="modal" data-bs-target="#{{ modal1_id }}Modal" data-bs-dismiss="modal">Create a New Group</button>
+    <button class="btn btn-outline-light w-100" data-bs-toggle="modal" data-bs-target="#{{ modal2_id }}Modal" data-bs-dismiss="modal">Join an Existing Group</button>
     </div>
 {% endblock %}
 
