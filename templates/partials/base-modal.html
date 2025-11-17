@@ -15,7 +15,9 @@
     
         {% block modal_footer %}
             <div class="modal-footer">
-              <button type="submit" class="btn btn-outline-light" form="{{ modal_id }}Form">Save</button>
+              <button type="submit" class="btn btn-outline-light" form="{{ modal_id }}Form">
+                  {% block submit_button_text %}Save{% endblock submit_button_text %}
+              </button>
             </div>
         {% endblock %}
     </div>
