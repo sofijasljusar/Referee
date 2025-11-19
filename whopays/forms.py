@@ -1,5 +1,5 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm, SetPasswordForm
 from django.contrib.auth.models import User
 
 
@@ -32,3 +32,12 @@ class EditUserForm(forms.ModelForm):
                 "placeholder": "Username"
             })
         }
+
+
+class CustomPasswordResetForm(PasswordResetForm):
+    email = forms.EmailField(
+        widget=forms.EmailInput(
+            attrs={"class": "mt-3 input-box",
+                   "placeholder": "Email"}
+        )
+    )

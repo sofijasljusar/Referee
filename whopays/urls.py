@@ -19,5 +19,7 @@ urlpatterns = [
     path('group/<str:code>/leave/', views.LeaveGroupView.as_view(), name='leave-group'),
     path('account/', views.EditUserView.as_view(), name='account'),
     path('delete-account/', views.DeleteUserView.as_view(), name='delete-account'),
+    path('password-reset/', views.CustomPasswordResetView.as_view(),
+         name='password-reset'),
 
 ]

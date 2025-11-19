@@ -11,10 +11,13 @@ from django.contrib import messages
 from django.contrib.auth.models import User
 from .forms import EditUserForm
 from .utils import pass_ownership
+from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
+from .forms import CustomPasswordResetForm, CustomSetPasswordForm
+from django.urls import reverse
 
 
 class SignUpView(CreateView):
-    template_name = "auth.html"
+    template_name = "auth/auth.html"
     form_class = SignUpForm
     success_url = reverse_lazy("groups")
 
@@ -25,7 +28,7 @@ class SignUpView(CreateView):
 
 
 class LogInView(LoginView):
-    template_name = "auth.html"
+    template_name = "auth/auth.html"
     authentication_form = LogInForm
 
     def get_context_data(self, **kwargs):
@@ -157,3 +160,14 @@ class DeleteUserView(LoginRequiredMixin, View):
         user.delete()
 
         return redirect("login")
+
+
+class CustomPasswordResetView(PasswordResetView):
+    template_name = "auth/auth.html"
+    form_class = CustomPasswordResetForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Reset Password"
+        context["back_url"] = reverse("login")
+        return context

@@ -7,6 +7,10 @@
                 <img src="{% static 'whopays/images/cloud-signup.png' %}" style="height: 200px">
             {% elif title == 'Log In' %}
                 <img src="{% static 'whopays/images/cloud-login.png' %}" style="height: 200px">
+            {% else %}
+                {% include 'partials/back-button.html' %}
+                <div class="top-bar-item start-50 translate-middle-x">{{ title }}</div>
+                <div style="height: 190px"></div>
             {% endif %}
         </div>
         <div class="col-4"></div>
@@ -33,10 +37,13 @@
                 </button>
             </div>
 
-            <div class="text-center pt-3">
+            <div class="text-center">
                 {% if title == "Log In" %}
-                    <a href="{% url 'signup' %}" class="link">Sign Up</a>
-                {% else %}
+                    <div class="d-flex flex-column align-items-center gap-3 pt-3">
+                        <a href="{% url 'signup' %}" class="link">Sign Up</a>
+                        <a href="{% url 'password-reset' %}" class="link">Forgot password?</a>
+                    </div>
+                {% elif title == "Sign Up"  %}
                     <a href="{% url 'login' %}" class="link">Log In</a>
                 {% endif %}
             </div>
