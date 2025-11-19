@@ -5,9 +5,12 @@ from django.contrib.auth.models import User
 
 class SignUpForm(UserCreationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={"class": "mt-3 input-box", "placeholder": "Username"}))
-    email = forms.EmailField(required=True, widget=forms.EmailInput(attrs={"class": "mt-3 input-box", "placeholder": "Email"}))
-    password1 = forms.CharField(widget=forms.PasswordInput(attrs={"class": "mt-3 input-box", "placeholder": "Password"}))
-    password2 = forms.CharField(widget=forms.PasswordInput(attrs={"class": "mt-3 input-box", "placeholder": "Confirm Password"}))
+    email = forms.EmailField(required=True,
+                             widget=forms.EmailInput(attrs={"class": "mt-3 input-box", "placeholder": "Email"}))
+    password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={"class": "mt-3 input-box", "placeholder": "Password"}))
+    password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={"class": "mt-3 input-box", "placeholder": "Confirm Password"}))
 
     class Meta:
         model = User
@@ -39,5 +42,20 @@ class CustomPasswordResetForm(PasswordResetForm):
         widget=forms.EmailInput(
             attrs={"class": "mt-3 input-box",
                    "placeholder": "Email"}
+        )
+    )
+
+
+class CustomSetPasswordForm(SetPasswordForm):
+    new_password1 = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={"class": "mt-3 input-box",
+                   "placeholder": "New Password"}
+        )
+    )
+    new_password2 = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={"class": "mt-3 input-box",
+                   "placeholder": "Confirm Password"}
         )
     )

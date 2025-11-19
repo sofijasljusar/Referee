@@ -9,10 +9,11 @@ from .models import UserProfile, PayingQueueGroup, GroupMember
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
-from .forms import EditUserForm
+from .forms import EditUserForm, CustomSetPasswordForm
 from .utils import pass_ownership
-from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
-from .forms import CustomPasswordResetForm, CustomSetPasswordForm
+from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, \
+    PasswordResetCompleteView
+from .forms import CustomPasswordResetForm
 from django.urls import reverse
 
 
@@ -170,4 +171,35 @@ class CustomPasswordResetView(PasswordResetView):
         context = super().get_context_data(**kwargs)
         context["title"] = "Reset Password"
         context["back_url"] = reverse("login")
+        return context
+
+
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    template_name = "auth/simple-message.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["back_url"] = reverse("login")
+        context["message"] = "Check your email for password reset instructions."
+        return context
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    template_name = "auth/auth.html"
+    form_class = CustomSetPasswordForm
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Set New Password"
+        context["back_url"] = reverse("login")
+        return context
+
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = "auth/simple-message.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["back_url"] = reverse("login")
+        context["message"] = "Your password has been successfully changed. You can now return to the login page."
         return context
