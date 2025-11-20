@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% load static %}
 {%  block content %}
+    {% include 'partials/back-button.html' %}
+    
     <div class="row d-flex justify-content-center align-items-center position-relative pt-5">
-
-        {% include 'partials/back-button.html' %}
         <div class="d-flex flex-column align-items-center gap-5">
             <div id="colorPicker"></div>
             <input type="hidden" id="themeColor" name="theme_color">
