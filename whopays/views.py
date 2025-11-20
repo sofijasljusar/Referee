@@ -166,6 +166,9 @@ class DeleteUserView(LoginRequiredMixin, View):
 class CustomPasswordResetView(PasswordResetView):
     template_name = "auth/auth.html"
     form_class = CustomPasswordResetForm
+    email_template_name = "registration/password-reset-email.html"
+    html_email_template_name = "registration/password-reset-email-html.html"
+    subject_template_name = "registration/password-reset-subject.txt"
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
