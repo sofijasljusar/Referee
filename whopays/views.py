@@ -9,12 +9,13 @@ from .models import UserProfile, PayingQueueGroup, GroupMember
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
-from .forms import EditUserForm, CustomSetPasswordForm
+from .forms import EditUserForm, CustomSetPasswordForm, EditGroupForm
 from .utils import pass_ownership
 from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, \
     PasswordResetCompleteView
 from .forms import CustomPasswordResetForm
 from django.urls import reverse
+from django.core.exceptions import PermissionDenied
 
 
 class SignUpView(CreateView):
@@ -206,3 +207,31 @@ class CustomPasswordResetCompleteView(PasswordResetCompleteView):
         context["back_url"] = reverse("login")
         context["message"] = "Your password has been successfully changed. You can now return to the login page."
         return context
+
+
+class EditGroupView(LoginRequiredMixin, UpdateView):
+    model = PayingQueueGroup
+    form_class = EditGroupForm
+    template_name = "edit-group.html"
+    slug_field = "code"
+    slug_url_kwarg = "code"
+
+    def get_queryset(self):
+        return PayingQueueGroup.objects.filter(owner=self.request.user)
+
+    def get_form_kwargs(self):
+        kwargs = super().get_form_kwargs()
+        kwargs["group"] = self.object
+        return kwargs
+
+    def form_valid(self, form):
+        messages.success(self.request, "Group updated successfully!")
+        return super().form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["back_url"] = reverse("group-detail", kwargs={'code': self.object.code})
+        return context
+
+    def get_success_url(self):
+        return reverse("group-detail", kwargs={"code": self.object.code})

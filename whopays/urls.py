@@ -28,5 +28,6 @@ urlpatterns = [
     path('password-reset-complete/',
          views.CustomPasswordResetCompleteView.as_view(),
          name='password_reset_complete'),
+    path('group/<str:code>/edit/', views.EditGroupView.as_view(), name='edit-group'),
 
 ]
