@@ -12,7 +12,7 @@
 {% endblock open-menu-button %}
 
 {% block menu_content %}
-{% include 'partials/confirm-leave-modal.html' with modal_id="confirmLeaveGroup" %}
+{% include 'partials/confirm-leave-group-modal.html' with modal_id="confirmLeaveGroup" %}
 
 <h6 class="mb-3">Group code</h6>    
     <span id="groupCode">{{ group.code }}</span>
@@ -122,8 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
         saveReorderBtn.classList.add("d-none");
         turnOnReorderBtn.classList.remove("d-none");
     });
-    
-    // Observe menu close and exit reorder mode without saving
+
     const drawer = document.getElementById("settingsDrawer");
     const observer = new MutationObserver(() => {
         if (sortable && !drawer.classList.contains("open"))  {

@@ -1,0 +1,19 @@
+{% extends "partials/base-modal.html" %}
+
+{% block modal_title %}Delete Group{% endblock %}
+
+{% block modal_body %}
+    <p class="text-center font-20">
+          Are you sure you want to delete <strong>{{ group.name }}</strong>?
+    </p>
+{% endblock %}
+
+{% block modal_footer %}
+<div class="modal-footer">
+    <form method="POST" action="{% url 'delete-group' code=group.code %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Yes, Delete</button>
+    </form>
+    <button type="button" class="btn btn-outline-light" data-bs-dismiss="modal">Cancel</button>
+</div>
+{% endblock %}

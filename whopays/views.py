@@ -16,6 +16,7 @@ from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, 
 from .forms import CustomPasswordResetForm
 from django.urls import reverse
 from django.core.exceptions import PermissionDenied
+from django.views.generic import DeleteView
 
 
 class SignUpView(CreateView):
@@ -231,6 +232,7 @@ class EditGroupView(LoginRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context["back_url"] = reverse("group-detail", kwargs={'code': self.object.code})
+        context["group"] = self.object
         return context
 
     def get_success_url(self):
@@ -241,3 +243,16 @@ class EditGroupView(LoginRequiredMixin, UpdateView):
         if obj.owner != request.user:
             raise PermissionDenied()
         return super().dispatch(request, *args, **kwargs)
+
+
+class DeleteGroupView(LoginRequiredMixin, View):
+    def post(self, request, code):
+        group = PayingQueueGroup.objects.get(code=code)
+
+        if request.user != group.owner:
+            raise PermissionDenied
+
+        group.delete()
+
+        return redirect("groups")
+
