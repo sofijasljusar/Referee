@@ -23,7 +23,12 @@
             <li class="list-group-item d-flex justify-content-between align-items-center
                 {% if current_payer and member == current_payer %}current-payer{% endif %}"
                 data-member-id="{{ member.id }}">
-                {{ member.user.username }}
+                {% if group.owner and member.user == group.owner  %}
+                    <span class="trimmed-text-shorter text-start">{{ member.user.username }}</span>
+                    <span class="badge bg-dark rounded-pill font-12 me-1">Owner</span>
+                {% else %}
+                    <span class="trimmed-text-longer text-start">{{ member.user.username }}</span>
+                {% endif %}
             </li>
         {% empty %}
             <li class="list-group-item">No members yet.</li>
@@ -33,6 +38,7 @@
 {#        </li>#}
     </ul>
     <div class="mx-auto text-center w-75">
+    
         {% if request.user == group.owner %}
 {#            <button class="btn btn-outline-light mb-3 w-100">Change current payer</button>#}
 {#            <button class="btn btn-outline-light mb-3 w-100">Reorder Queue</button>#}
@@ -41,9 +47,9 @@
                 Group Settings
             </a>
         {% endif %}
-        
-        <button class="btn btn-danger mb-3 w-100" 
-                data-bs-toggle="modal" 
+
+        <button class="btn btn-danger mb-3 w-100"
+                data-bs-toggle="modal"
                 data-bs-target="#confirmLeaveGroupModal">
             Leave Group
         </button>
