@@ -12,7 +12,7 @@
 
 {% block menu_content %}
     <h6 class="mb-3">Hello,</h6>
-    <span id="groupCode">{{ request.user.username }}</span>
+    <span id="groupCode" class="trimmed-text-shorter">{{ request.user.username }}</span>
     <div class="mx-auto text-center w-75 mt-3">
         <a href="{% url 'settings' %}" class="btn btn-outline-light mb-3 w-100">Settings</a>
         <a href="{% url 'account' %}" class="btn btn-outline-light mb-3 w-100">Account</a>
