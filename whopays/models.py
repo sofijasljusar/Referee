@@ -59,8 +59,11 @@ class GroupMember(models.Model):
             self.order = (last_order or 0) + 1
         super().save(*args, **kwargs)
 
-    def __str__(self):
+    def __repr__(self):
         return f"Member of a group {self.group.code}: {self.user.username}."
+
+    def __str__(self):
+        return self.user.username
 
 
 class PayingState(models.Model):
