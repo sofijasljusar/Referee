@@ -14,6 +14,7 @@ class ReorderQueueAPIView(APIView):
         if group.owner != request.user:
             return Response({"status": "error", "message": "Only owner can reorder queue."}, status=403)
         new_order = request.data.get("new_order", [])
+        new_order = [int(i) for i in new_order]
         members = group.members.all()
         order_map = {member_id: index for index, member_id in enumerate(new_order, start=1)}
 

@@ -38,10 +38,10 @@
 {#        </li>#}
     </ul>
     <div class="mx-auto text-center w-75">
-    
+
         {% if request.user == group.owner %}
 {#            <button class="btn btn-outline-light mb-3 w-100">Change current payer</button>#}
-{#            <button class="btn btn-outline-light mb-3 w-100">Reorder Queue</button>#}
+            <button class="btn btn-outline-light mb-3 w-100">Reorder Queue</button>
             <a class="btn btn-outline-light mb-3 w-100"
                     href="{% url 'edit-group' group.code %}">
                 Group Settings
@@ -55,5 +55,51 @@
         </button>
         
     </div>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+    function getCookie(name) {
+        const cookies = document.cookie.split(';').map(c => c.trim());
+        for (const cookie of cookies) {
+            if (cookie.startsWith(name + '=')) {
+                return decodeURIComponent(cookie.substring(name.length + 1));
+            }
+        }
+        return null;
+    }
+
+    const reorderBtn = document.querySelector(".btn.btn-outline-light.mb-3.w-100");
+    if (!reorderBtn) return;
+    const list = document.getElementById("memberList");
+    let sortable = null;
+    let reorderMode = false;
     
+    reorderBtn.addEventListener("click", () => {
+        reorderMode = !reorderMode;
+        if (reorderMode) {
+            reorderBtn.textContent = "Save";
+            sortable = Sortable.create(list, { animation: 150 });
+        } else {
+            reorderBtn.textContent = "Reorder Queue";
+            const newOrder = [...list.children].map(li => li.dataset.memberId);
+            const groupCode = document.getElementById("groupCode").textContent.trim();
+            
+            fetch(`/group/${groupCode}/reorder/`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRFToken": getCookie("csrftoken")
+                },
+                body: JSON.stringify({ new_order: newOrder })
+            });
+            sortable.destroy();
+            sortable = null;
+        }
+    });
+});
+            
+            
+</script>
 {% endblock menu_content %}
