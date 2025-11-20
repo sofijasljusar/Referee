@@ -72,13 +72,29 @@ document.addEventListener("DOMContentLoaded", () => {
         return null;
     }
 
+    function restoreOriginalOrder() {
+        const orderMap = {};
+        [...list.children].forEach(li => {
+            orderMap[li.dataset.memberId] = li; 
+        });
+    
+        originalOrder.forEach(id => {
+            list.appendChild(orderMap[id]);
+        });
+    }
+    
+    
     const turnOnReorderBtn = document.getElementById("turnOnReorderBtn");
     if (!turnOnReorderBtn) return;
     const saveReorderBtn = document.getElementById("saveReorderBtn");
     const list = document.getElementById("memberList");
     let sortable = null;
+    let originalOrder = null;
+    
 
     turnOnReorderBtn.addEventListener("click", () => {
+        originalOrder = [...list.children].map(li => li.dataset.memberId);
+        
         sortable = Sortable.create(list, { animation: 150 });
         
         saveReorderBtn.classList.remove("d-none");
@@ -106,6 +122,22 @@ document.addEventListener("DOMContentLoaded", () => {
         saveReorderBtn.classList.add("d-none");
         turnOnReorderBtn.classList.remove("d-none");
     });
+    
+    // Observe menu close and exit reorder mode without saving
+    const drawer = document.getElementById("settingsDrawer");
+    const observer = new MutationObserver(() => {
+        if (sortable && !drawer.classList.contains("open"))  {
+            sortable.destroy();
+            sortable = null;
+            
+            restoreOriginalOrder();
+    
+            saveReorderBtn.classList.remove("active");
+            saveReorderBtn.classList.add("d-none");
+            turnOnReorderBtn.classList.remove("d-none");
+        }
+    });
+    observer.observe(drawer, { attributes: true, attributeFilter: ["class"] });
 });
 </script>
     
