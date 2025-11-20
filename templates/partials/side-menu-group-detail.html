@@ -41,7 +41,9 @@
 
         {% if request.user == group.owner %}
 {#            <button class="btn btn-outline-light mb-3 w-100">Change current payer</button>#}
-            <button class="btn btn-outline-light mb-3 w-100">Reorder Queue</button>
+            <button id="turnOnReorderBtn" class="btn btn-outline-light mb-3 w-100">Reorder Queue</button>
+            <button id="saveReorderBtn" class="btn btn-outline-light mb-3 w-100 d-none">Save</button>
+
             <a class="btn btn-outline-light mb-3 w-100"
                     href="{% url 'edit-group' group.code %}">
                 Group Settings
@@ -70,36 +72,41 @@ document.addEventListener("DOMContentLoaded", () => {
         return null;
     }
 
-    const reorderBtn = document.querySelector(".btn.btn-outline-light.mb-3.w-100");
-    if (!reorderBtn) return;
+    const turnOnReorderBtn = document.getElementById("turnOnReorderBtn");
+    if (!turnOnReorderBtn) return;
+    const saveReorderBtn = document.getElementById("saveReorderBtn");
     const list = document.getElementById("memberList");
     let sortable = null;
-    let reorderMode = false;
+
+    turnOnReorderBtn.addEventListener("click", () => {
+        sortable = Sortable.create(list, { animation: 150 });
+        
+        saveReorderBtn.classList.remove("d-none");
+        saveReorderBtn.classList.add("active");
+        turnOnReorderBtn.classList.add("d-none");
+    });
     
-    reorderBtn.addEventListener("click", () => {
-        reorderMode = !reorderMode;
-        if (reorderMode) {
-            reorderBtn.textContent = "Save";
-            sortable = Sortable.create(list, { animation: 150 });
-        } else {
-            reorderBtn.textContent = "Reorder Queue";
-            const newOrder = [...list.children].map(li => li.dataset.memberId);
-            const groupCode = document.getElementById("groupCode").textContent.trim();
-            
-            fetch(`/group/${groupCode}/reorder/`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                    "X-CSRFToken": getCookie("csrftoken")
-                },
-                body: JSON.stringify({ new_order: newOrder })
-            });
-            sortable.destroy();
-            sortable = null;
-        }
+    saveReorderBtn.addEventListener("click", () => {
+        sortable.destroy();
+        sortable = null;
+        
+        const newOrder = [...list.children].map(li => li.dataset.memberId);
+        const groupCode = document.getElementById("groupCode").textContent.trim();
+
+        fetch(`/group/${groupCode}/reorder/`, {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "X-CSRFToken": getCookie("csrftoken")
+            },
+            body: JSON.stringify({ new_order: newOrder })
+        });
+        
+        saveReorderBtn.classList.remove("active");
+        saveReorderBtn.classList.add("d-none");
+        turnOnReorderBtn.classList.remove("d-none");
     });
 });
-            
-            
 </script>
+    
 {% endblock menu_content %}
