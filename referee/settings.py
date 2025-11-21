@@ -13,6 +13,14 @@ SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change")
 
 ALLOWED_HOSTS = ["*"]
 
+CSRF_TRUSTED_ORIGINS = [
+    "https://site--referee--2sln2j6hvx4f.code.run",
+]
+
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
 
 # Application definition
 
