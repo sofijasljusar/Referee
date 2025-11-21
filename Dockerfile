@@ -23,8 +23,7 @@ RUN python manage.py collectstatic --noinput
 # Apply database migrations
 RUN python manage.py migrate
 
-# Expose port
-EXPOSE 8000
-
 # Start server
-CMD ["gunicorn", "referee.wsgi:application", "--bind", "0.0.0.0:8000"]
+CMD ["gunicorn", "referee.wsgi:application", "--bind", "0.0.0.0:8080"]
+# Expose port
+EXPOSE 8080
