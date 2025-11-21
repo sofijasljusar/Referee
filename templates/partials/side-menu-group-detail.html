@@ -40,7 +40,9 @@
     <div class="mx-auto text-center w-75">
 
         {% if request.user == group.owner %}
-{#            <button class="btn btn-outline-light mb-3 w-100">Change current payer</button>#}
+            <button id="changePayerBtn" class="btn btn-outline-light mb-3 w-100">Change current payer</button>
+            <button id="savePayerBtn" class="btn btn-outline-light mb-3 w-100 d-none">Save</button>
+            
             <button id="turnOnReorderBtn" class="btn btn-outline-light mb-3 w-100">Reorder Queue</button>
             <button id="saveReorderBtn" class="btn btn-outline-light mb-3 w-100 d-none">Save</button>
 
@@ -62,6 +64,23 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
+    // Instant open menu if "?menu=open" in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get("menu") === "open") {
+        const drawer = document.getElementById("settingsDrawer");
+        if (drawer && !drawer.classList.contains("open")) {
+            // Temporarily disable transitions
+            drawer.style.transition = "none";
+            drawer.classList.add("open");
+
+            // Force a reflow so the class change is applied instantly
+            void drawer.offsetWidth;
+
+            // Restore transition for future user interactions
+            drawer.style.transition = "";
+        }
+    }
+
     function getCookie(name) {
         const cookies = document.cookie.split(';').map(c => c.trim());
         for (const cookie of cookies) {
@@ -71,7 +90,10 @@ document.addEventListener("DOMContentLoaded", () => {
         }
         return null;
     }
-
+    
+    const list = document.getElementById("memberList");
+    if (!list) return;
+    
     function restoreOriginalOrder() {
         const orderMap = {};
         [...list.children].forEach(li => {
@@ -87,7 +109,6 @@ document.addEventListener("DOMContentLoaded", () => {
     const turnOnReorderBtn = document.getElementById("turnOnReorderBtn");
     if (!turnOnReorderBtn) return;
     const saveReorderBtn = document.getElementById("saveReorderBtn");
-    const list = document.getElementById("memberList");
     let sortable = null;
     let originalOrder = null;
     
@@ -137,6 +158,99 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
     observer.observe(drawer, { attributes: true, attributeFilter: ["class"] });
+// ---------- PAYING MEMBER LOGIC ----------
+    const changePayerBtn = document.getElementById("changePayerBtn");
+    const savePayerBtn = document.getElementById("savePayerBtn");
+    let originalPayerId = null;
+    let selectedPayerId = null;
+
+    if (changePayerBtn) {
+        changePayerBtn.addEventListener("click", () => {
+            // Store original payer
+            const currentPayerEl = list.querySelector(".current-payer");
+            if (currentPayerEl) originalPayerId = currentPayerEl.dataset.memberId;
+
+            // visually unselect current payer
+            if (currentPayerEl) currentPayerEl.classList.remove("current-payer");
+
+            // Enter "select new payer" mode
+            savePayerBtn.classList.remove("d-none");
+            savePayerBtn.classList.add("active");
+            changePayerBtn.classList.add("d-none");
+
+            // Allow clicking members to select new payer
+            list.querySelectorAll("li").forEach(li => {
+                li.style.cursor = "pointer";
+                li.addEventListener("click", selectPayerHandler);
+            });
+        });
+
+        function selectPayerHandler(event) {
+            // remove previous selection
+            list.querySelectorAll("li").forEach(li => li.classList.remove("current-payer"));
+            event.currentTarget.classList.add("current-payer");
+            selectedPayerId = event.currentTarget.dataset.memberId;
+        }
+
+        savePayerBtn.addEventListener("click", () => {
+            if (!selectedPayerId) {
+                restoreOriginalPayer();
+            } else {
+                // save new payer via API
+                const groupCode = document.getElementById("groupCode").textContent.trim();
+                fetch(`/group/${groupCode}/set-current-payer/`, {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "X-CSRFToken": getCookie("csrftoken")
+                    },
+                    body: JSON.stringify({ member_id: selectedPayerId })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    console.log("Set current payer response:", data);
+                    originalPayerId = selectedPayerId;
+                    selectedPayerId = null;
+                    const groupCode = document.getElementById("groupCode").textContent.trim();
+                    window.location.href = `/group/${groupCode}/?menu=open`;
+                })
+                .catch(err => console.error(err));
+            }
+
+            savePayerBtn.classList.remove("active");
+            savePayerBtn.classList.add("d-none");
+            changePayerBtn.classList.remove("d-none");
+            list.querySelectorAll("li").forEach(li => li.style.cursor = "default");
+            list.querySelectorAll("li").forEach(li => li.removeEventListener("click", selectPayerHandler));
+        });
+
+        function restoreOriginalPayer() {
+            list.querySelectorAll("li").forEach(li => li.classList.remove("current-payer"));
+            if (originalPayerId) {
+                const originalEl = list.querySelector(`li[data-member-id="${originalPayerId}"]`);
+                if (originalEl) originalEl.classList.add("current-payer");
+            }
+            selectedPayerId = null;
+        }
+
+        
+        const drawer = document.getElementById("settingsDrawer");
+        if (drawer) {
+            const observer = new MutationObserver(() => {
+                if (drawer.classList && !drawer.classList.contains("open")) {
+                    restoreOriginalPayer();
+                    savePayerBtn.classList.add("d-none");
+                    changePayerBtn.classList.remove("d-none");
+                    list.querySelectorAll("li").forEach(li => {
+                        li.style.cursor = "default";
+                        li.removeEventListener("click", selectPayerHandler);
+                    });
+                }
+            });
+            observer.observe(drawer, { attributes: true, attributeFilter: ["class"] });
+        }
+    }
+
 });
 </script>
     

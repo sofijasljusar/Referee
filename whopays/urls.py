@@ -30,5 +30,6 @@ urlpatterns = [
          name='password_reset_complete'),
     path('group/<str:code>/edit/', views.EditGroupView.as_view(), name='edit-group'),
     path('group/<str:code>/delete/', views.DeleteGroupView.as_view(), name='delete-group'),
-
+    path('group/<str:code>/set-current-payer/', api_views.SetCurrentPayingMember.as_view(), name="api_set_current_payer"
+    ),
 ]
