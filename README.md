@@ -1,20 +1,27 @@
-# Referee 
+# Referee — Coffee Payment Queue
 
-I came up with this idea in 5 minutes for a class task :) 
-
-... a year later I came back to it just as a fun project to code in my spare time.
-
----
 ## 💡 Idea
-
 >My friend and I always argue about whose turn it is to pay for coffee.  
->She is usually very kind, but at that moment very aggressive 😅  
->Now we can continue being good friends and Referee will "keep score" whose turn it is, so that nobody has any doubts.
+>She is usually very kind, but at that moment very aggressively insists on treating me 😅
+>Referee solves this in a simple way — it keeps track of turns so there are no doubts.
 
-**🍿 You can see the presentation I made here ---> [Google Slides](https://docs.google.com/presentation/d/1CiUjhWtTMvgXvkIWWcl2AC-XVt5LBAUm16DgYxvY_RA/edit?usp=sharing)**
+### Check it out 👉🏻 [Referee](https://site--referee--2sln2j6hvx4f.code.run/)
 
-**🎬 And here are some mock designs ---> [Figma](https://www.figma.com/design/K93c1aAHkftommCpQg03XA/Referee?node-id=3-2&t=W7fUIRYu8v3rpQQJ-1)**
+## 🔎 Overview
+Mobile-oriented web application focused on clean data modeling and backend workflow design.
+The system is built to be simple and practical, tailored to real user needs.
 
-## Tech Stack
-Initially, I planned to make it a mobile app, but I realized I can achieve the same convenience with a web app using Python and Django. 
-What is more, in the process I can learn some interesting things like asynchronous programming and how to do it in Django (WebSockets, DjangoChannels vs FastApi, asynchronous protocols, ASGI).
+## ✔️ Key Features
+- Group-based interaction using invite codes
+- Owner-controlled group management
+- Consistent state synchronization across multiple clients
+- Instant UI updates via WebSockets (Django Channels)
+
+## 🏛 Architecture & Design
+The backend is built with Django and Django Channels, using PostgreSQL as the primary data store.
+
+Key design considerations:
+- Keep the domain model simple and user-focused
+- Designing data models for shared group state and interactions
+- Implementing real-time communication patterns
+- Modular architecture enabling iterative improvements based on user feedback
