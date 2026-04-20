@@ -18,7 +18,12 @@ The system is built to be simple and practical, tailored to real user needs.
 - Instant UI updates via WebSockets (Django Channels)
 
 ## 🏛 Architecture & Design
-The backend is built with Django and Django Channels, using PostgreSQL as the primary data store.
+>The backend is built with Django, combining:
+>- Django templates for server-rendered views
+>- Django REST Framework for API endpoints handling client-side interactions
+>- Django Channels for real-time updates via WebSockets
+>
+>PostgreSQL is used as the primary data store.
 
 Key design considerations:
 - Keep the domain model simple and user-focused
