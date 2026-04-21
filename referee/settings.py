@@ -7,7 +7,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 ENV = os.getenv("ENV", "development")
 DEBUG = False
-ALLOWED_HOSTS = ["*"]  # Or your domain
+ALLOWED_HOSTS = ["127.0.0.1", "site--referee--2sln2j6hvx4f.code.run"]  # Or your domain
 CSRF_TRUSTED_ORIGINS = ["https://site--referee--2sln2j6hvx4f.code.run"]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
