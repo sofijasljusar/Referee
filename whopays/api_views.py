@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from .models import PayingQueueGroup, GroupMember
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 class ReorderQueueAPIView(APIView):
@@ -54,6 +56,15 @@ class AdvanceTurnAPIView(APIView):
 
         group.paying_state.advance_paying_member()
         new_current = group.paying_state.current_paying_member
+
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"group_{code}",
+            {
+                "type": "payer_changed",
+                "current_payer": new_current.user.username
+            }
+        )
 
         return Response({
             "status": "success",

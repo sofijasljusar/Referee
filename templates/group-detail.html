@@ -27,6 +27,19 @@
 
     <script>
     document.addEventListener("DOMContentLoaded", () => {
+        const code =  "{{ group.code }}";
+        const ws = new WebSocket(
+            (window.location.protocol === "https:" ? "wss://" : "ws://") +
+            window.location.host +
+            "/ws/groups/" + code + "/"
+        );
+        ws.onmessage = function (event) {
+          const data = JSON.parse(event.data);
+          if (data.type === "payer_changed") {
+              location.reload();
+          }
+        };
+
         const btn = document.getElementById("advanceTurnBtn");
         if (!btn) return;  // button does not exist for non-payers
     
@@ -37,14 +50,8 @@
                     "X-CSRFToken": "{{ csrf_token }}",
                     "Content-Type": "application/json"
                 },
-            })
-            .then(res => res.json())
-            .then(data => {
-                if (data.status === "success") {
-                    location.reload();
-                }
-            })
-        })
-    })
+            });
+        });
+    });
     </script>
 {% endblock content %}

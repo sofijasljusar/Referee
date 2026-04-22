@@ -25,6 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'channels',
     "whopays.apps.WhopaysConfig"
 ]
 
@@ -59,6 +60,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'referee.wsgi.application'
 
+ASGI_APPLICATION = "referee.asgi.application"
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 
@@ -138,3 +140,10 @@ EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASS")
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 90
+
+
+CHANNEL_LAYERS = {
+    "default": {
+        "BACKEND": "channels.layers.InMemoryChannelLayer",
+    }
+}
