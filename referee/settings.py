@@ -6,13 +6,15 @@ import dj_database_url
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 ENV = os.getenv("ENV", "development")
-DEBUG = False
+IS_PROD = ENV == "production"
+DEBUG = not IS_PROD
 ALLOWED_HOSTS = ["127.0.0.1", "site--referee--2sln2j6hvx4f.code.run"]  # Or your domain
-CSRF_TRUSTED_ORIGINS = ["https://site--referee--2sln2j6hvx4f.code.run"]
+CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000", "https://site--referee--2sln2j6hvx4f.code.run"]
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-CSRF_COOKIE_SECURE = True
-SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = IS_PROD
+SESSION_COOKIE_SECURE = IS_PROD
+
 
 SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change")
 
