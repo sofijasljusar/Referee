@@ -24,6 +24,6 @@ RUN python manage.py collectstatic --noinput
 RUN python manage.py migrate
 
 # Start server
-CMD ["daphne", "-b", "0.0.0.0", "-p", "8080", "referee.asgi:application"]
+CMD ["python", "-m", "daphne", "-b", "0.0.0.0", "-p", "8080", "referee.asgi:application"]
 # Expose port
 EXPOSE 8080
