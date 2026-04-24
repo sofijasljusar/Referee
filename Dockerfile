@@ -24,6 +24,6 @@ RUN python manage.py collectstatic --noinput
 RUN python manage.py migrate
 
 # Start server
-CMD ["gunicorn", "referee.wsgi:application", "--bind", "0.0.0.0:8080"]
+CMD ["daphne", "-b", "0.0.0.0", "-p", "8080", "referee.asgi:application"]
 # Expose port
 EXPOSE 8080
