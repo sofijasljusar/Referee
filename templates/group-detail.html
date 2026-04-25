@@ -18,6 +18,11 @@
 
     <script>
     document.addEventListener("DOMContentLoaded", () => {
+        function updateCurrentPayer(currentPayer) {
+            showPayingState(currentPayer)
+            highlightCurrentPayer(currentPayer)
+        }
+
         function showPayingState(currentPayer) {
             const img = document.getElementById("payerImage");
             const btn = document.getElementById("advance-turn-button");
@@ -34,8 +39,17 @@
             }
         }
 
+        function highlightCurrentPayer(currentPayer) {
+            document.querySelectorAll("#memberList li").forEach(li => {
+                li.classList.remove("current-payer");
+            });
+
+            const el = document.querySelector(`#memberList li[data-member-id="${currentPayer}"]`);
+            el.classList.add("current-payer");
+        }
+
         const currentUser = {{ current_user_member_id }};
-        showPayingState({{ current_payer_id }});
+        updateCurrentPayer({{ current_payer_id }});
 
         const code =  "{{ group.code }}";
         const ws = new WebSocket(
@@ -46,7 +60,7 @@
         ws.onmessage = function (event) {
           const data = JSON.parse(event.data);
           if (data.type === "payer_changed") {
-              showPayingState(data.current_payer_id);
+              updateCurrentPayer(data.current_payer_id);
           }
         };
 

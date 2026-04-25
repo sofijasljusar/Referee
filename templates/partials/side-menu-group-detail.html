@@ -20,8 +20,7 @@
     <h6 class="mt-5 mb-3">Members</h6>
     <ul id="memberList" class="list-group-flush pb-3">
         {% for member in members %}
-            <li class="list-group-item d-flex justify-content-between align-items-center
-                {% if member.id == current_payer_id %}current-payer{% endif %}"
+            <li class="list-group-item d-flex justify-content-between align-items-center"
                 data-member-id="{{ member.id }}">
                 {% if group.owner and member.user == group.owner  %}
                     <span class="trimmed-text-shorter text-start">{{ member.user.username }}</span>
