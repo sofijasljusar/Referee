@@ -14,7 +14,7 @@
 {% block menu_content %}
 {% include 'partials/confirm-leave-group-modal.html' with modal_id="confirmLeaveGroup" %}
 
-<h6 class="mb-3">Group code</h6>    
+<h6 class="mb-3">Group code</h6>
     <span id="groupCode">{{ group.code }}</span>
     
     <h6 class="mt-5 mb-3">Members</h6>
@@ -56,7 +56,7 @@
                 data-bs-target="#confirmLeaveGroupModal">
             Leave Group
         </button>
-        
+
     </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
@@ -110,22 +110,22 @@ document.addEventListener("DOMContentLoaded", () => {
     const saveReorderBtn = document.getElementById("saveReorderBtn");
     let sortable = null;
     let originalOrder = null;
-    
+
 
     turnOnReorderBtn.addEventListener("click", () => {
         originalOrder = [...list.children].map(li => li.dataset.memberId);
-        
+
         sortable = Sortable.create(list, { animation: 150 });
-        
+
         saveReorderBtn.classList.remove("d-none");
         saveReorderBtn.classList.add("active");
         turnOnReorderBtn.classList.add("d-none");
     });
-    
+
     saveReorderBtn.addEventListener("click", () => {
         sortable.destroy();
         sortable = null;
-        
+
         const newOrder = [...list.children].map(li => li.dataset.memberId);
         const groupCode = document.getElementById("groupCode").textContent.trim();
 
@@ -137,7 +137,7 @@ document.addEventListener("DOMContentLoaded", () => {
             },
             body: JSON.stringify({ new_order: newOrder })
         });
-        
+
         saveReorderBtn.classList.remove("active");
         saveReorderBtn.classList.add("d-none");
         turnOnReorderBtn.classList.remove("d-none");
@@ -148,9 +148,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (sortable && !drawer.classList.contains("open"))  {
             sortable.destroy();
             sortable = null;
-            
+
             restoreOriginalOrder();
-    
+
             saveReorderBtn.classList.remove("active");
             saveReorderBtn.classList.add("d-none");
             turnOnReorderBtn.classList.remove("d-none");
@@ -162,9 +162,11 @@ document.addEventListener("DOMContentLoaded", () => {
     const savePayerBtn = document.getElementById("savePayerBtn");
     let originalPayerId = null;
     let selectedPayerId = null;
+    let isPayerSelectionMode = false;
 
     if (changePayerBtn) {
         changePayerBtn.addEventListener("click", () => {
+            isPayerSelectionMode = true;
             // Store original payer
             const currentPayerEl = list.querySelector(".current-payer");
             if (currentPayerEl) originalPayerId = currentPayerEl.dataset.memberId;
@@ -221,6 +223,7 @@ document.addEventListener("DOMContentLoaded", () => {
             changePayerBtn.classList.remove("d-none");
             list.querySelectorAll("li").forEach(li => li.style.cursor = "default");
             list.querySelectorAll("li").forEach(li => li.removeEventListener("click", selectPayerHandler));
+            isPayerSelectionMode = false;
         });
 
         function restoreOriginalPayer() {
@@ -232,11 +235,11 @@ document.addEventListener("DOMContentLoaded", () => {
             selectedPayerId = null;
         }
 
-        
+
         const drawer = document.getElementById("settingsDrawer");
         if (drawer) {
             const observer = new MutationObserver(() => {
-                if (drawer.classList && !drawer.classList.contains("open")) {
+                if (isPayerSelectionMode && !drawer.classList.contains("open")) {
                     restoreOriginalPayer();
                     savePayerBtn.classList.add("d-none");
                     changePayerBtn.classList.remove("d-none");
@@ -252,5 +255,5 @@ document.addEventListener("DOMContentLoaded", () => {
 
 });
 </script>
-    
+
 {% endblock menu_content %}
