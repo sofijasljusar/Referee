@@ -67,10 +67,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const urlParams = new URLSearchParams(window.location.search);
     if (urlParams.get("menu") === "open") {
         const drawer = document.getElementById("settingsDrawer");
+        const overlay = document.getElementById("overlay");
         if (drawer && !drawer.classList.contains("open")) {
-            // Temporarily disable transitions
+            // Temporarily disable transitions to avoid flicker
             drawer.style.transition = "none";
+            overlay.style.transition = "none";
             drawer.classList.add("open");
+            overlay.classList.add("show");
 
             // Force a reflow so the class change is applied instantly
             void drawer.offsetWidth;
@@ -194,7 +197,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         savePayerBtn.addEventListener("click", () => {
-            if (!selectedPayerId) {
+            if (!selectedPayerId || selectedPayerId === originalPayerId) {
                 restoreOriginalPayer();
             } else {
                 // save new payer via API
