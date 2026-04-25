@@ -62,11 +62,11 @@ class AdvanceTurnAPIView(APIView):
             f"group_{code}",
             {
                 "type": "payer_changed",
-                "current_payer": new_current.user.username
+                "current_payer_id": new_current.id,
             }
         )
 
         return Response({
             "status": "success",
-            "current_payer": new_current.user.username
+            "current_payer_id": new_current.id,
         })

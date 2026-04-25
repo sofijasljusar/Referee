@@ -22,6 +22,6 @@ class GroupConsumer(AsyncWebsocketConsumer):
     async def payer_changed(self, event):
         await self.send(text_data=json.dumps({
             "type": "payer_changed",
-            "current_payer": event["current_payer"]
+            "current_payer_id": event["current_payer_id"]
         }))
 

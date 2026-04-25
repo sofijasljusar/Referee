@@ -61,11 +61,13 @@ class GroupDetailView(DetailView):
         context = super().get_context_data(**kwargs)
         group = self.object
         members = group.members.all()
-        current_payer = group.paying_state.current_paying_member
+        current_payer_id = group.paying_state.current_paying_member.id
+        current_user_member_id = group.members.get(user=self.request.user).id
         context.update({
             "group": group,
             "members": members,
-            "current_payer": current_payer
+            "current_payer_id": current_payer_id,
+            "current_user_member_id": current_user_member_id,
         })
         return context
 
