@@ -49,6 +49,19 @@
             el.classList.add("current-payer");
         }
 
+        function updateQueueOrder(newOrder) {
+            const list = document.getElementById("memberList");
+
+            const map = {};
+            [...list.children].forEach(li => {
+                map[li.dataset.memberId] = li;
+            });
+
+            newOrder.forEach(id => {
+                if (map[id]) list.appendChild(map[id]);
+            });
+        }
+
         const currentUser = {{ current_user_member_id }};
         updateCurrentPayer({{ current_payer_id }});
 
@@ -62,6 +75,9 @@
           const data = JSON.parse(event.data);
           if (data.type === "payer_changed") {
               updateCurrentPayer(data.current_payer_id);
+          }
+          if (data.type === "queue_reordered") {
+              updateQueueOrder(data.new_order)
           }
         };
 

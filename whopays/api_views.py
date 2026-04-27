@@ -25,6 +25,15 @@ class ReorderQueueAPIView(APIView):
 
         GroupMember.objects.bulk_update(members, ["order"])
 
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"group_{code}",
+            {
+                "type": "queue_reordered",
+                "new_order": new_order,
+            }
+        )
+
         return Response({"status": "success"})
 
 
