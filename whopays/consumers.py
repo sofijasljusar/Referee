@@ -31,3 +31,9 @@ class GroupConsumer(AsyncWebsocketConsumer):
             "new_order": event["new_order"],
         }))
 
+    async def user_joined(self, event):
+        await self.send(text_data=json.dumps({
+            "type": "user_joined",
+            "new_member_id": event["new_member_id"],
+            "new_member_username": event["new_member_username"],
+        }))

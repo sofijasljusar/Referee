@@ -62,6 +62,22 @@
             });
         }
 
+        function addMemberToList(newMemberId, newMemberUsername) {
+            const list = document.getElementById("memberList");
+
+            const li = document.createElement("li");
+            li.className = "list-group-item d-flex justify-content-between align-items-center";
+            li.dataset.memberId = newMemberId;
+
+            li.innerHTML = `
+                <span class="trimmed-text-longer text-start">
+                    ${newMemberUsername}
+                </span>
+            `;
+
+            list.appendChild(li);
+        }
+
         const currentUser = {{ current_user_member_id }};
         updateCurrentPayer({{ current_payer_id }});
 
@@ -78,6 +94,10 @@
           }
           if (data.type === "queue_reordered") {
               updateQueueOrder(data.new_order)
+          }
+          if (data.type === "user_joined") {
+              console.log("event happened")
+              addMemberToList(data.new_member_id, data.new_member_username);
           }
         };
 

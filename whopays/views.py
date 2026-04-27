@@ -17,6 +17,8 @@ from .forms import CustomPasswordResetForm
 from django.urls import reverse
 from django.core.exceptions import PermissionDenied
 from django.views.generic import DeleteView
+from channels.layers import get_channel_layer
+from asgiref.sync import async_to_sync
 
 
 class SignUpView(CreateView):
@@ -119,7 +121,16 @@ class JoinExistingGroupView(LoginRequiredMixin, View):
             return redirect("groups")
         user = request.user
         if not GroupMember.objects.filter(group=group, user=user).exists():
-            GroupMember.objects.create(group=group, user=user)
+            new_member = GroupMember.objects.create(group=group, user=user)
+            channel_layer = get_channel_layer()
+            async_to_sync(channel_layer.group_send)(
+                f"group_{code}",
+                {
+                    "type": "user_joined",
+                    "new_member_id": new_member.id,
+                    "new_member_username": new_member.user.username,
+                }
+            )
         else:
             messages.error(request, "You are already a member.")
         return redirect("groups")
