@@ -37,3 +37,9 @@ class GroupConsumer(AsyncWebsocketConsumer):
             "new_member_id": event["new_member_id"],
             "new_member_username": event["new_member_username"],
         }))
+
+    async def member_left(self, event):
+        await self.send(text_data=json.dumps({
+            "type": "member_left",
+            "member_id": event["member_id"],
+        }))

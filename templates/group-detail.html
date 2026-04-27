@@ -78,6 +78,16 @@
             list.appendChild(li);
         }
 
+        function removeMemberFromList(memberId) {
+            console.log("id", memberId);
+            const list = document.getElementById("memberList");
+            const el = list.querySelector(
+                `li[data-member-id="${memberId}"]`
+            );
+            console.log(el);
+            el.remove();
+        }
+
         const currentUser = {{ current_user_member_id }};
         updateCurrentPayer({{ current_payer_id }});
 
@@ -96,8 +106,10 @@
               updateQueueOrder(data.new_order)
           }
           if (data.type === "user_joined") {
-              console.log("event happened")
               addMemberToList(data.new_member_id, data.new_member_username);
+          }
+          if (data.type === "member_left") {
+              removeMemberFromList(data.member_id);
           }
         };
 

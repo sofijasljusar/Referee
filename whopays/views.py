@@ -140,7 +140,18 @@ class LeaveGroupView(LoginRequiredMixin, View):
     def post(self, request, code):
         group = PayingQueueGroup.objects.get(code=code)
         user = request.user
-        GroupMember.objects.filter(group=group, user=user).delete()
+        member = GroupMember.objects.get(group=group, user=user)
+
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"group_{code}",
+            {
+                "type": "member_left",
+                "member_id": member.id,
+            }
+        )
+
+        member.delete()
 
         if user == group.owner:
             pass_ownership(group)
