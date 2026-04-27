@@ -41,6 +41,15 @@ class SetCurrentPayingMember(APIView):
         group.paying_state.current_paying_member = member
         group.paying_state.save()
 
+        channel_layer = get_channel_layer()
+        async_to_sync(channel_layer.group_send)(
+            f"group_{code}",
+            {
+                "type": "payer_changed",
+                "current_payer_id": member.id,
+            }
+        )
+
         return Response({"status": "success",  "current_payer": member.user.username})
 
 

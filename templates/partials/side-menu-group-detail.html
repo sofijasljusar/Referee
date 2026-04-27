@@ -63,25 +63,6 @@
 
 <script>
 document.addEventListener("DOMContentLoaded", () => {
-    // Instant open menu if "?menu=open" in URL
-    const urlParams = new URLSearchParams(window.location.search);
-    if (urlParams.get("menu") === "open") {
-        const drawer = document.getElementById("settingsDrawer");
-        const overlay = document.getElementById("overlay");
-        if (drawer && !drawer.classList.contains("open")) {
-            // Temporarily disable transitions to avoid flicker
-            drawer.style.transition = "none";
-            overlay.style.transition = "none";
-            drawer.classList.add("open");
-            overlay.classList.add("show");
-
-            // Force a reflow so the class change is applied instantly
-            void drawer.offsetWidth;
-
-            // Restore transition for future user interactions
-            drawer.style.transition = "";
-        }
-    }
 
     function getCookie(name) {
         const cookies = document.cookie.split(';').map(c => c.trim());
@@ -210,15 +191,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     },
                     body: JSON.stringify({ member_id: selectedPayerId })
                 })
-                .then(res => res.json())
-                .then(data => {
-                    console.log("Set current payer response:", data);
+                .then(res => {
+                    if (!res.ok) throw new Error("Request failed");
+                })
+                .then(() => {
                     originalPayerId = selectedPayerId;
                     selectedPayerId = null;
-                    const groupCode = document.getElementById("groupCode").textContent.trim();
-                    window.location.href = `/group/${groupCode}/?menu=open`;
                 })
                 .catch(err => console.error(err));
+                originalPayerId = selectedPayerId;
+                selectedPayerId = null;
             }
 
             savePayerBtn.classList.remove("active");
