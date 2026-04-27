@@ -125,6 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
         saveReorderBtn.classList.remove("active");
         saveReorderBtn.classList.add("d-none");
         turnOnReorderBtn.classList.remove("d-none");
+        turnOnReorderBtn.blur()
     });
 
     const drawer = document.getElementById("settingsDrawer");
@@ -206,6 +207,7 @@ document.addEventListener("DOMContentLoaded", () => {
             savePayerBtn.classList.remove("active");
             savePayerBtn.classList.add("d-none");
             changePayerBtn.classList.remove("d-none");
+            changePayerBtn.blur()
             list.querySelectorAll("li").forEach(li => li.style.cursor = "default");
             list.querySelectorAll("li").forEach(li => li.removeEventListener("click", selectPayerHandler));
             isPayerSelectionMode = false;
