@@ -2,23 +2,20 @@ from pathlib import Path
 import os
 import dj_database_url
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 ENV = os.getenv("ENV", "development")
 IS_PROD = ENV == "production"
 DEBUG = not IS_PROD
-ALLOWED_HOSTS = ["127.0.0.1", "site--referee--2sln2j6hvx4f.code.run"]  # Or your domain
-CSRF_TRUSTED_ORIGINS = ["http://127.0.0.1:8000", "https://site--referee--2sln2j6hvx4f.code.run"]
+ALLOWED_HOSTS = os.environ["ALLOWED_HOSTS"].split(",")
+CSRF_TRUSTED_ORIGINS = os.environ["CSRF_TRUSTED_ORIGINS"].split(",")
 
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 CSRF_COOKIE_SECURE = IS_PROD
 SESSION_COOKIE_SECURE = IS_PROD
 
 
-SECRET_KEY = os.getenv("SECRET_KEY", "dev-secret-key-change")
-
-# Application definition
+SECRET_KEY = os.environ["SECRET_KEY"]
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -120,7 +117,11 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
+STORAGES = {
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
@@ -136,8 +137,8 @@ EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = os.environ.get("EMAIL_USER")
-EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_PASS")
+EMAIL_HOST_USER = os.environ["EMAIL_HOST_USER"]
+EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
 
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
 
