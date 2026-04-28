@@ -4,7 +4,7 @@
 
 {% block modal_body %}
     <div class="d-flex flex-column align-items-center">
-        <form method="POST" action="{% url 'create-new-group' %}" id="{{ modal_id }}Form">
+        <form method="POST" action="{% url 'group-create' %}" id="{{ modal_id }}Form">
           {% csrf_token %}
             <div class="d-flex flex-column gap-3">
               <label for="groupName" class="visually-hidden form-label tiny-text">Group Name:</label>

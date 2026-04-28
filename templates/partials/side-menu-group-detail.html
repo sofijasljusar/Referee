@@ -46,7 +46,7 @@
             <button id="saveReorderBtn" class="btn btn-outline-light mb-3 w-100 d-none">Save</button>
 
             <a class="btn btn-outline-light mb-3 w-100"
-                    href="{% url 'edit-group' group.code %}">
+                    href="{% url 'group-edit' group.code %}">
                 Group Settings
             </a>
         {% endif %}
@@ -111,9 +111,8 @@ document.addEventListener("DOMContentLoaded", () => {
         sortable = null;
 
         const newOrder = [...list.children].map(li => li.dataset.memberId);
-        const groupCode = document.getElementById("groupCode").textContent.trim();
 
-        fetch(`/group/${groupCode}/reorder/`, {
+        fetch("{% url 'api-group-reorder' group.code %}", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
@@ -184,7 +183,7 @@ document.addEventListener("DOMContentLoaded", () => {
             } else {
                 // save new payer via API
                 const groupCode = document.getElementById("groupCode").textContent.trim();
-                fetch(`/group/${groupCode}/set-current-payer/`, {
+                fetch("{% url 'api-group-set-current-payer' group.code %}", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json",

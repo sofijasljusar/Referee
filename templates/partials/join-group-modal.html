@@ -4,7 +4,7 @@
 
 {% block modal_body %}
     <div class="d-flex flex-column align-items-center">
-        <form method="POST" action="{% url 'join-existing-group' %}" id="{{ modal_id }}Form">
+        <form method="POST" action="{% url 'group-join' %}" id="{{ modal_id }}Form">
           {% csrf_token %}
             <div class="d-flex flex-column gap-3">
               <label for="groupCode" class="visually-hidden form-label tiny-text">Group Code:</label>

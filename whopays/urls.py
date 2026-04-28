@@ -5,31 +5,37 @@ from django.contrib.auth import views as auth_views
 
 urlpatterns = [
     path('', RedirectView.as_view(pattern_name='groups', permanent=False)),
-    path('signup/', views.SignUpView.as_view(), name='signup'),
-    path('login/', views.LogInView.as_view(), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
-    path('groups/', views.GroupsView.as_view(), name='groups'),
-    path('group/<str:code>/', views.GroupDetailView.as_view(), name='group-detail'),
-    path('group/<str:code>/reorder/', api_views.ReorderQueueAPIView.as_view(), name='api_reorder_queue'),
-    path('settings/', views.SettingsView.as_view(), name='settings'),
-    path('update-theme-color/', views.UpdateThemeColorView.as_view(), name="update_theme_color"),
-    path('group/<str:code>/advance-turn/', api_views.AdvanceTurnAPIView.as_view(), name='api_advance_turn'),
-    path('create-new-group/', views.CreateNewGroupView.as_view(), name='create-new-group'),
-    path('join-existing-group/', views.JoinExistingGroupView.as_view(), name='join-existing-group'),
-    path('group/<str:code>/leave/', views.LeaveGroupView.as_view(), name='leave-group'),
-    path('account/', views.EditUserView.as_view(), name='account'),
-    path('delete-account/', views.DeleteUserView.as_view(), name='delete-account'),
-    path('password-reset/', views.CustomPasswordResetView.as_view(),
-         name='password-reset'),
-    path('password-reset/done/', views.CustomPasswordResetDoneView.as_view(),
+
+    path('auth/signup/', views.SignUpView.as_view(), name='signup'),
+    path('auth/login/', views.LogInView.as_view(), name='login'),
+    path('auth/logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+    path('auth/password-reset/', views.CustomPasswordResetView.as_view(),
+         name='password_reset'),
+    path('auth/password-reset/done/', views.CustomPasswordResetDoneView.as_view(),
          name='password_reset_done'),
-    path('password-reset-confirm/<uidb64>/<token>', views.CustomPasswordResetConfirmView.as_view(),
+    path('auth/password-reset/<uidb64>/<token>/', views.CustomPasswordResetConfirmView.as_view(),
          name='password_reset_confirm'),
-    path('password-reset-complete/',
+    path('auth/password-reset/complete/',
          views.CustomPasswordResetCompleteView.as_view(),
          name='password_reset_complete'),
-    path('group/<str:code>/edit/', views.EditGroupView.as_view(), name='edit-group'),
-    path('group/<str:code>/delete/', views.DeleteGroupView.as_view(), name='delete-group'),
-    path('group/<str:code>/set-current-payer/', api_views.SetCurrentPayingMember.as_view(), name="api_set_current_payer"
+    path('account/', views.EditUserView.as_view(), name='account'),
+    path('account/delete/', views.DeleteUserView.as_view(), name='account-delete'),
+
+    path('groups/', views.GroupsView.as_view(), name='groups'),
+    path('groups/create/', views.CreateNewGroupView.as_view(), name='group-create'),
+    path('groups/join/', views.JoinExistingGroupView.as_view(), name='group-join'),
+
+    path('groups/<str:code>/', views.GroupDetailView.as_view(), name='group-detail'),
+    path('groups/<str:code>/edit/', views.EditGroupView.as_view(), name='group-edit'),
+    path('groups/<str:code>/leave/', views.LeaveGroupView.as_view(), name='group-leave'),
+    path('groups/<str:code>/delete/', views.DeleteGroupView.as_view(), name='group-delete'),
+
+    path('api/groups/<str:code>/advance-turn/', api_views.AdvanceTurnAPIView.as_view(), name='api-group-advance-turn'),
+    path('api/groups/<str:code>/set-current-payer/', api_views.SetCurrentPayingMember.as_view(), name="api-group-set-current-payer"
     ),
+    path('api/groups/<str:code>/reorder/', api_views.ReorderQueueAPIView.as_view(), name='api-group-reorder'),
+
+    path('settings/', views.SettingsView.as_view(), name='settings'),
+    path('settings/theme/', views.UpdateThemeColorView.as_view(), name="theme-update"),
+
 ]

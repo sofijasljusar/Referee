@@ -10,7 +10,7 @@
 
 {% block modal_footer %}
 <div class="modal-footer">
-    <form method="POST" action="{% url 'leave-group' group.code %}">
+    <form method="POST" action="{% url 'group-leave' group.code %}">
         {% csrf_token %}
         <button type="submit" class="btn btn-danger">Yes, Leave</button>
     </form>

@@ -41,7 +41,7 @@
                 {% if title == "Log In" %}
                     <div class="d-flex flex-column align-items-center gap-3 pt-3">
                         <a href="{% url 'signup' %}" class="link">Sign Up</a>
-                        <a href="{% url 'password-reset' %}" class="link">Forgot password?</a>
+                        <a href="{% url 'password_reset' %}" class="link">Forgot password?</a>
                     </div>
                 {% elif title == "Sign Up"  %}
                     <a href="{% url 'login' %}" class="link">Log In</a>

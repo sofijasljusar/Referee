@@ -117,7 +117,7 @@
 
         btn.addEventListener("click", () => {
             if (btn.disabled) return;
-            fetch("{% url 'api_advance_turn' group.code %}", {
+            fetch("{% url 'api-group-advance-turn' group.code %}", {
                 method: "POST",
                 headers: {
                     "X-CSRFToken": "{{ csrf_token }}",

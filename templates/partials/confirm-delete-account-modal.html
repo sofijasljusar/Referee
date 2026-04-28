@@ -10,7 +10,7 @@
 
 {% block modal_footer %}
 <div class="modal-footer">
-    <form method="POST" action="{% url 'delete-account' %}">
+    <form method="POST" action="{% url 'account-delete' %}">
         {% csrf_token %}
         <button type="submit" class="btn btn-danger">Yes, Delete</button>
     </form>
