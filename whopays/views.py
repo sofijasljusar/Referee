@@ -214,13 +214,20 @@ class CustomPasswordResetDoneView(PasswordResetDoneView):
 
 
 class CustomPasswordResetConfirmView(PasswordResetConfirmView):
-    template_name = "auth/auth.html"
     form_class = CustomSetPasswordForm
+
+    def get_template_names(self):
+        if self.validlink:
+            return ["auth/auth.html"]
+        return ["auth/simple-message.html"]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context["title"] = "Set New Password"
         context["back_url"] = reverse("login")
+        if self.validlink:
+            context["title"] = "Set New Password"
+        else:
+            context["message"] = "This link has already been used or expired."
         return context
 
 
