@@ -88,8 +88,44 @@
             el.remove();
         }
 
+        function updateOwner(newOwnerId) {
+            showOwnerPill(newOwnerId);
+            showOwnerControls(newOwnerId);
+        }
+
+        function showOwnerPill(newOwnerId) {
+            const list = document.getElementById("memberList");
+            list.querySelectorAll(".owner-pill").forEach(el => el.remove());
+            list.querySelectorAll("li span:first-child").forEach(span => {
+                span.classList.remove("trimmed-text-shorter");
+                span.classList.add("trimmed-text-longer");
+            });
+
+            const newOwnerEl = list.querySelector(`li[data-member-id="${newOwnerId}"]`);
+            const nameSpan = newOwnerEl.querySelector("span");
+            nameSpan.classList.remove("trimmed-text-longer");
+            nameSpan.classList.add("trimmed-text-shorter");
+            const pill = document.createElement("span");
+            pill.className = "badge bg-dark rounded-pill font-12 me-1 owner-pill";
+            pill.innerText = "Owner";
+
+            newOwnerEl.appendChild(pill);
+        }
+
+        function showOwnerControls(newOwnerId) {
+            if (currentUser === newOwnerId) {
+                const payerBtn = document.getElementById("changePayerBtn");
+                const reorderBtn = document.getElementById("turnOnReorderBtn");
+                const settingsBtn = document.getElementById("groupSettingsBtn");
+                payerBtn.classList.remove("d-none");
+                reorderBtn.classList.remove("d-none");
+                settingsBtn.classList.remove("d-none");
+            }
+        }
+
         const currentUser = {{ current_user_member_id }};
         updateCurrentPayer({{ current_payer_id }});
+        updateOwner({{ owner_member_id }});
 
         const code =  "{{ group.code }}";
         const ws = new WebSocket(
@@ -109,7 +145,17 @@
               addMemberToList(data.new_member_id, data.new_member_username);
           }
           if (data.type === "member_left") {
+              console.log(data)
+              console.log("group deleted", data.group_deleted)
+              if (data.group_deleted) {
+                  window.location.href = "{% url 'groups' %}";
+              }
               removeMemberFromList(data.member_id);
+              console.log("member deleted")
+              updateCurrentPayer(data.current_payer_id);
+              console.log("payer updated")
+              updateOwner(data.owner_member_id);
+              console.log("owner updated")
           }
         };
 

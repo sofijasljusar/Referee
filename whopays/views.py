@@ -10,15 +10,17 @@ from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
 from .forms import EditUserForm, CustomSetPasswordForm, EditGroupForm
-from .utils import pass_ownership
 from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, \
     PasswordResetCompleteView
 from .forms import CustomPasswordResetForm
 from django.urls import reverse
 from django.core.exceptions import PermissionDenied
-from django.views.generic import DeleteView
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from django.db import IntegrityError
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SignUpView(CreateView):
@@ -65,11 +67,13 @@ class GroupDetailView(DetailView):
         members = group.members.all()
         current_payer_id = group.paying_state.current_paying_member.id
         current_user_member_id = group.members.get(user=self.request.user).id
+        owner_member_id = group.members.get(user=group.owner).id
         context.update({
             "group": group,
             "members": members,
             "current_payer_id": current_payer_id,
             "current_user_member_id": current_user_member_id,
+            "owner_member_id": owner_member_id,
         })
         return context
 
@@ -107,7 +111,11 @@ class CreateNewGroupView(LoginRequiredMixin, View):
         group_data = {"owner": request.user, "name": name}
         if emoji:
             group_data["emoji"] = emoji
-        PayingQueueGroup.objects.create(**group_data)
+        try:
+            PayingQueueGroup.create_group(**group_data)
+        except IntegrityError as e:
+            logger.warning("Group code collision occurred", exc_info=e)
+            messages.error(request, "Something went wrong. Please try again.")
         return redirect("groups")
 
 
@@ -120,8 +128,10 @@ class JoinExistingGroupView(LoginRequiredMixin, View):
             messages.error(request, "Group not found.")
             return redirect("groups")
         user = request.user
-        if not GroupMember.objects.filter(group=group, user=user).exists():
-            new_member = GroupMember.objects.create(group=group, user=user)
+        new_member, created = GroupMember.objects.get_or_create(group=group, user=user)
+        if not created:
+            messages.error(request, "You are already a member.")
+        else:
             channel_layer = get_channel_layer()
             async_to_sync(channel_layer.group_send)(
                 f"group_{code}",
@@ -131,8 +141,6 @@ class JoinExistingGroupView(LoginRequiredMixin, View):
                     "new_member_username": new_member.user.username,
                 }
             )
-        else:
-            messages.error(request, "You are already a member.")
         return redirect("groups")
 
 
@@ -141,20 +149,22 @@ class LeaveGroupView(LoginRequiredMixin, View):
         group = PayingQueueGroup.objects.get(code=code)
         user = request.user
         member = GroupMember.objects.get(group=group, user=user)
+        member_id = member.id
 
+        result = group.remove_member(member)
         channel_layer = get_channel_layer()
-        async_to_sync(channel_layer.group_send)(
-            f"group_{code}",
-            {
-                "type": "member_left",
-                "member_id": member.id,
-            }
-        )
 
-        member.delete()
-
-        if user == group.owner:
-            pass_ownership(group)
+        if not result["group_deleted"]:
+            async_to_sync(channel_layer.group_send)(
+                f"group_{code}",
+                {
+                    "type": "member_left",
+                    "member_id": member_id,
+                    "group_deleted": result["group_deleted"],
+                    "current_payer_id": result["current_payer_id"],
+                    "owner_member_id": result["owner_member_id"]
+                }
+            )
 
         return redirect("groups")
 
@@ -178,11 +188,11 @@ class EditUserView(LoginRequiredMixin, UpdateView):
 class DeleteUserView(LoginRequiredMixin, View):
     def post(self, request):
         user = request.user
+        groups = PayingQueueGroup.objects.filter(members__user=user)
 
-        GroupMember.objects.filter(user=user).delete()
-
-        for group in PayingQueueGroup.objects.filter(owner=user):
-            pass_ownership(group)
+        for group in groups:
+            member = group.members.get(user=user)
+            group.remove_member(member)
 
         user.delete()
 
@@ -283,7 +293,7 @@ class DeleteGroupView(LoginRequiredMixin, View):
         if request.user != group.owner:
             raise PermissionDenied
 
-        group.delete()
+        group.close_group()
 
         return redirect("groups")
 

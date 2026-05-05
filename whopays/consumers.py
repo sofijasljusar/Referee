@@ -42,4 +42,7 @@ class GroupConsumer(AsyncWebsocketConsumer):
         await self.send(text_data=json.dumps({
             "type": "member_left",
             "member_id": event["member_id"],
+            "group_deleted": event["group_deleted"],
+            "current_payer_id": event["current_payer_id"],
+            "owner_member_id": event["owner_member_id"]
         }))

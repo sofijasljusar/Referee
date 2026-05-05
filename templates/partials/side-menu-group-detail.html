@@ -22,34 +22,24 @@
         {% for member in members %}
             <li class="list-group-item d-flex justify-content-between align-items-center"
                 data-member-id="{{ member.id }}">
-                {% if group.owner and member.user == group.owner  %}
-                    <span class="trimmed-text-shorter text-start">{{ member.user.username }}</span>
-                    <span class="badge bg-dark rounded-pill font-12 me-1">Owner</span>
-                {% else %}
-                    <span class="trimmed-text-longer text-start">{{ member.user.username }}</span>
-                {% endif %}
+                <span class="trimmed-text-longer text-start">{{ member.user.username }}</span>
             </li>
         {% empty %}
             <li class="list-group-item">No members yet.</li>
         {% endfor %}
-{#        <li class="list-group-item d-flex justify-content-between align-items-center">#}
-{#            +#}
-{#        </li>#}
     </ul>
     <div class="mx-auto text-center w-75">
 
-        {% if request.user == group.owner %}
-            <button id="changePayerBtn" class="btn btn-outline-light mb-3 w-100">Change current payer</button>
-            <button id="savePayerBtn" class="btn btn-outline-light mb-3 w-100 d-none">Save</button>
-            
-            <button id="turnOnReorderBtn" class="btn btn-outline-light mb-3 w-100">Reorder Queue</button>
-            <button id="saveReorderBtn" class="btn btn-outline-light mb-3 w-100 d-none">Save</button>
+        <button id="changePayerBtn" class="btn btn-outline-light mb-3 w-100 d-none">Change current payer</button>
+        <button id="savePayerBtn" class="btn btn-outline-light mb-3 w-100 d-none">Save</button>
 
-            <a class="btn btn-outline-light mb-3 w-100"
-                    href="{% url 'group-edit' group.code %}">
-                Group Settings
-            </a>
-        {% endif %}
+        <button id="turnOnReorderBtn" class="btn btn-outline-light mb-3 w-100 d-none">Reorder Queue</button>
+        <button id="saveReorderBtn" class="btn btn-outline-light mb-3 w-100 d-none">Save</button>
+
+        <a id="groupSettingsBtn" class="btn btn-outline-light mb-3 w-100 d-none"
+                href="{% url 'group-edit' group.code %}">
+            Group Settings
+        </a>
 
         <button class="btn btn-danger mb-3 w-100"
                 data-bs-toggle="modal"
@@ -182,7 +172,6 @@ document.addEventListener("DOMContentLoaded", () => {
                 restoreOriginalPayer();
             } else {
                 // save new payer via API
-                const groupCode = document.getElementById("groupCode").textContent.trim();
                 fetch("{% url 'api-group-set-current-payer' group.code %}", {
                     method: "POST",
                     headers: {
