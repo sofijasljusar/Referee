@@ -129,7 +129,10 @@ class JoinExistingGroupView(LoginRequiredMixin, View):
             messages.error(request, "Group not found.")
             return redirect("groups")
         user = request.user
-        new_member, created = GroupService.add_member(group=group, user=user)
+        result = GroupService.add_member(group=group, user=user)
+        created = result.created
+        new_member = result.member
+
         if not created:
             messages.error(request, "You are already a member.")
         else:
