@@ -79,12 +79,10 @@
         }
 
         function removeMemberFromList(memberId) {
-            console.log("id", memberId);
             const list = document.getElementById("memberList");
             const el = list.querySelector(
                 `li[data-member-id="${memberId}"]`
             );
-            console.log(el);
             el.remove();
         }
 
@@ -145,17 +143,12 @@
               addMemberToList(data.new_member_id, data.new_member_username);
           }
           if (data.type === "member_left") {
-              console.log(data)
-              console.log("group deleted", data.group_deleted)
               if (data.group_deleted) {
                   window.location.href = "{% url 'groups' %}";
               }
               removeMemberFromList(data.member_id);
-              console.log("member deleted")
               updateCurrentPayer(data.current_payer_id);
-              console.log("payer updated")
               updateOwner(data.owner_member_id);
-              console.log("owner updated")
           }
         };
 

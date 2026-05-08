@@ -3,6 +3,7 @@ from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 from .models import PayingQueueGroup, GroupMember
+from .services import GroupService
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 
@@ -19,6 +20,11 @@ class ReorderQueueAPIView(APIView):
         new_order = [int(i) for i in new_order]
         members = group.members.all()
         order_map = {member_id: index for index, member_id in enumerate(new_order, start=1)}
+
+        for i, member in enumerate(members):
+            member.order = i + 1000
+
+        GroupMember.objects.bulk_update(members, ["order"])
 
         for member in members:
             member.order = order_map[member.id]
@@ -45,8 +51,7 @@ class SetCurrentPayingMember(APIView):
         if group.owner != request.user:
             return Response({"status": "error", "message": "Only owner can set current payer."}, status=403)
 
-        member_id = request.data.get("member_id")
-        member = group.members.get(id=member_id)
+        member = group.members.get(id=request.data.get("member_id"))
         group.paying_state.current_paying_member = member
         group.paying_state.save()
 
@@ -72,7 +77,7 @@ class AdvanceTurnAPIView(APIView):
         if current_paying_member.user != request.user:
             return Response({"status": "error", "message": "Only current paying member can advance turn."}, status=403)
 
-        group.paying_state.advance_paying_member()
+        GroupService.advance_paying_member(group)
         new_current = group.paying_state.current_paying_member
 
         channel_layer = get_channel_layer()

@@ -3,3 +3,6 @@ class InvalidPayingStateError(Exception):
 
 class EmptyGroupError(Exception):
     pass
+
+class GroupCodeGenerationError(Exception):
+    pass

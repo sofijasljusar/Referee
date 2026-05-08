@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import JsonResponse
 import json
 from .models import UserProfile, PayingQueueGroup, GroupMember
+from .services import GroupService
 from django.shortcuts import redirect
 from django.contrib import messages
 from django.contrib.auth.models import User
@@ -17,7 +18,7 @@ from django.urls import reverse
 from django.core.exceptions import PermissionDenied
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
-from django.db import IntegrityError
+from .exceptions import GroupCodeGenerationError
 import logging
 
 logger = logging.getLogger(__name__)
@@ -64,16 +65,13 @@ class GroupDetailView(DetailView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         group = self.object
-        members = group.members.all()
-        current_payer_id = group.paying_state.current_paying_member.id
-        current_user_member_id = group.members.get(user=self.request.user).id
-        owner_member_id = group.members.get(user=group.owner).id
+
         context.update({
             "group": group,
-            "members": members,
-            "current_payer_id": current_payer_id,
-            "current_user_member_id": current_user_member_id,
-            "owner_member_id": owner_member_id,
+            "members": group.members.all(),
+            "current_payer_id": group.paying_state.current_paying_member.id,
+            "current_user_member_id": group.members.get(user=self.request.user).id,
+            "owner_member_id": group.members.get(user=group.owner).id,
         })
         return context
 
@@ -107,15 +105,18 @@ class CreateNewGroupView(LoginRequiredMixin, View):
         if not name:
             messages.error(request, "Group name cannot be blank.")
             return redirect("groups")
-
-        group_data = {"owner": request.user, "name": name}
-        if emoji:
-            group_data["emoji"] = emoji
         try:
-            PayingQueueGroup.create_group(**group_data)
-        except IntegrityError as e:
-            logger.warning("Group code collision occurred", exc_info=e)
-            messages.error(request, "Something went wrong. Please try again.")
+            GroupService.create_group(
+                owner=request.user,
+                name=name,
+                emoji=emoji or None,
+            )
+        except GroupCodeGenerationError:
+            messages.error(
+                request,
+                "Could not create group right now. Please try again."
+            )
+
         return redirect("groups")
 
 
@@ -128,7 +129,7 @@ class JoinExistingGroupView(LoginRequiredMixin, View):
             messages.error(request, "Group not found.")
             return redirect("groups")
         user = request.user
-        new_member, created = GroupMember.objects.get_or_create(group=group, user=user)
+        new_member, created = GroupService.add_member(group=group, user=user)
         if not created:
             messages.error(request, "You are already a member.")
         else:
@@ -147,22 +148,21 @@ class JoinExistingGroupView(LoginRequiredMixin, View):
 class LeaveGroupView(LoginRequiredMixin, View):
     def post(self, request, code):
         group = PayingQueueGroup.objects.get(code=code)
-        user = request.user
-        member = GroupMember.objects.get(group=group, user=user)
+        member = GroupMember.objects.get(group=group, user=request.user)
         member_id = member.id
 
-        result = group.remove_member(member)
+        result = GroupService.remove_member(group, member)
         channel_layer = get_channel_layer()
 
-        if not result["group_deleted"]:
+        if not result.group_deleted:
             async_to_sync(channel_layer.group_send)(
                 f"group_{code}",
                 {
                     "type": "member_left",
                     "member_id": member_id,
-                    "group_deleted": result["group_deleted"],
-                    "current_payer_id": result["current_payer_id"],
-                    "owner_member_id": result["owner_member_id"]
+                    "group_deleted": result.group_deleted,
+                    "current_payer_id": result.current_payer_id,
+                    "owner_member_id": result.owner_member_id,
                 }
             )
 
@@ -192,7 +192,7 @@ class DeleteUserView(LoginRequiredMixin, View):
 
         for group in groups:
             member = group.members.get(user=user)
-            group.remove_member(member)
+            GroupService.remove_member(group, member)
 
         user.delete()
 
@@ -293,7 +293,7 @@ class DeleteGroupView(LoginRequiredMixin, View):
         if request.user != group.owner:
             raise PermissionDenied
 
-        group.close_group()
+        GroupService.close_group(group)
 
         return redirect("groups")
 
