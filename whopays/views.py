@@ -1,4 +1,4 @@
-from django.views.generic import TemplateView, CreateView, DetailView, UpdateView, View
+from django.views.generic import TemplateView, CreateView, DetailView, UpdateView, View, ListView
 from django.contrib.auth.views import LoginView
 from .forms import SignUpForm, LogInForm
 from django.urls import reverse_lazy
@@ -19,9 +19,7 @@ from django.core.exceptions import PermissionDenied
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
 from .exceptions import GroupCodeGenerationError
-import logging
-
-logger = logging.getLogger(__name__)
+from django.shortcuts import get_object_or_404
 
 
 class SignUpView(CreateView):
@@ -45,22 +43,32 @@ class LogInView(LoginView):
         return context
 
 
-class GroupsView(LoginRequiredMixin, TemplateView):
+class GroupsView(LoginRequiredMixin, ListView):
+    model = PayingQueueGroup
     template_name = "groups.html"
+    context_object_name = "user_groups"
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        user = self.request.user
-        user_groups = PayingQueueGroup.objects.filter(members__user=user).distinct()
-        context["user_groups"] = user_groups
-        return context
+    def get_queryset(self):
+        return PayingQueueGroup.objects.filter(members__user=self.request.user)
 
 
-class GroupDetailView(DetailView):
+class GroupDetailView(LoginRequiredMixin, DetailView):
     model = PayingQueueGroup
     template_name = "group-detail.html"
     slug_field = "code"
     slug_url_kwarg = "code"
+
+    def get_queryset(self):
+        return (
+            PayingQueueGroup.objects
+            .filter(members__user=self.request.user)
+            .select_related(
+                "owner",
+                "paying_state",
+                "paying_state__current_paying_member",
+            )
+            .prefetch_related("members__user")
+        )
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -76,7 +84,7 @@ class GroupDetailView(DetailView):
         return context
 
 
-class SettingsView(TemplateView):
+class SettingsView(LoginRequiredMixin, TemplateView):
     template_name = "settings.html"
 
 
@@ -150,7 +158,11 @@ class JoinExistingGroupView(LoginRequiredMixin, View):
 
 class LeaveGroupView(LoginRequiredMixin, View):
     def post(self, request, code):
-        group = PayingQueueGroup.objects.get(code=code)
+        group = get_object_or_404(
+            PayingQueueGroup,
+            code=code,
+            members__user=self.request.user,
+        )
         member = GroupMember.objects.get(group=group, user=request.user)
         member_id = member.id
 
@@ -191,11 +203,10 @@ class EditUserView(LoginRequiredMixin, UpdateView):
 class DeleteUserView(LoginRequiredMixin, View):
     def post(self, request):
         user = request.user
-        groups = PayingQueueGroup.objects.filter(members__user=user)
+        members = GroupMember.objects.select_related("group").filter(user=user)
 
-        for group in groups:
-            member = group.members.get(user=user)
-            GroupService.remove_member(group, member)
+        for member in members:
+            GroupService.remove_member(member.group, member)
 
         user.delete()
 
@@ -282,18 +293,16 @@ class EditGroupView(LoginRequiredMixin, UpdateView):
     def get_success_url(self):
         return reverse("group-detail", kwargs={"code": self.object.code})
 
-    def dispatch(self, request, *args, **kwargs):
-        obj = self.get_object()
-        if obj.owner != request.user:
-            raise PermissionDenied()
-        return super().dispatch(request, *args, **kwargs)
-
 
 class DeleteGroupView(LoginRequiredMixin, View):
     def post(self, request, code):
-        group = PayingQueueGroup.objects.get(code=code)
+        group = get_object_or_404(
+            PayingQueueGroup,
+            code=code,
+            members__user=request.user,
+        )
 
-        if request.user != group.owner:
+        if group.owner != request.user:
             raise PermissionDenied
 
         GroupService.close_group(group)
