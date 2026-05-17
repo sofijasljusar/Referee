@@ -16,10 +16,9 @@ from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, 
 from .forms import CustomPasswordResetForm
 from django.urls import reverse
 from django.core.exceptions import PermissionDenied
-from channels.layers import get_channel_layer
-from asgiref.sync import async_to_sync
 from .exceptions import GroupCodeGenerationError
 from django.shortcuts import get_object_or_404
+from .notifiers import GroupRealtimeNotifier
 
 
 class SignUpView(CreateView):
@@ -144,14 +143,9 @@ class JoinExistingGroupView(LoginRequiredMixin, View):
         if not created:
             messages.error(request, "You are already a member.")
         else:
-            channel_layer = get_channel_layer()
-            async_to_sync(channel_layer.group_send)(
-                f"group_{code}",
-                {
-                    "type": "user_joined",
-                    "new_member_id": new_member.id,
-                    "new_member_username": new_member.user.username,
-                }
+            GroupRealtimeNotifier.user_joined(
+                code=code,
+                new_member=new_member,
             )
         return redirect("groups")
 
@@ -167,18 +161,12 @@ class LeaveGroupView(LoginRequiredMixin, View):
         member_id = member.id
 
         result = GroupService.leave_group(group, member)
-        channel_layer = get_channel_layer()
 
         if not result.group_deleted:
-            async_to_sync(channel_layer.group_send)(
-                f"group_{code}",
-                {
-                    "type": "member_left",
-                    "member_id": member_id,
-                    "group_deleted": result.group_deleted,
-                    "current_payer_id": result.current_payer_id,
-                    "owner_member_id": result.owner_member_id,
-                }
+            GroupRealtimeNotifier.member_left(
+                code=code,
+                member_id=member_id,
+                result=result,
             )
 
         return redirect("groups")

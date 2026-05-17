@@ -6,13 +6,13 @@ from dataclasses import dataclass
 from django.db.models import Max
 
 
-@dataclass
+@dataclass(frozen=True)
 class JoinGroupResult:
     member: GroupMember
     created: bool
 
 
-@dataclass
+@dataclass(frozen=True)
 class LeaveGroupResult:
     group_deleted: bool
     current_payer_id: int | None
