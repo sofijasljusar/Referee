@@ -7,13 +7,13 @@ from django.db.models import Max
 
 
 @dataclass
-class AddMemberResult:
+class JoinGroupResult:
     member: GroupMember
     created: bool
 
 
 @dataclass
-class RemoveMemberResult:
+class LeaveGroupResult:
     group_deleted: bool
     current_payer_id: int | None
     owner_member_id: int | None
@@ -46,7 +46,7 @@ class GroupService:
             **data
         )
 
-        result = GroupService.add_member(
+        result = GroupService.join_group(
             group=group,
             user=owner,
         )
@@ -65,7 +65,7 @@ class GroupService:
         group.delete()
 
     @staticmethod
-    def add_member(group, user):
+    def join_group(group, user):
         last_order = (
             group.members.aggregate(Max("order"))["order__max"]
             or 0
@@ -77,19 +77,19 @@ class GroupService:
             defaults={"order": last_order + 1},
         )
 
-        return AddMemberResult(
+        return JoinGroupResult(
             member=member,
             created=created
         )
 
     @staticmethod
     @transaction.atomic
-    def remove_member(group, member):
+    def leave_group(group, member):
         remaining_members = list(group.members.exclude(id=member.id))
 
         if not remaining_members:
             GroupService.close_group(group)
-            return RemoveMemberResult(
+            return LeaveGroupResult(
                 group_deleted=True,
                 current_payer_id=None,
                 owner_member_id=None,
@@ -108,7 +108,7 @@ class GroupService:
 
         owner_member_id = group.members.get(user=group.owner).id
 
-        return RemoveMemberResult(
+        return LeaveGroupResult(
             group_deleted=False,
             current_payer_id=paying_state.current_paying_member_id,
             owner_member_id=owner_member_id,

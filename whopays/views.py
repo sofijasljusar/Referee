@@ -137,7 +137,7 @@ class JoinExistingGroupView(LoginRequiredMixin, View):
             messages.error(request, "Group not found.")
             return redirect("groups")
         user = request.user
-        result = GroupService.add_member(group=group, user=user)
+        result = GroupService.join_group(group=group, user=user)
         created = result.created
         new_member = result.member
 
@@ -166,7 +166,7 @@ class LeaveGroupView(LoginRequiredMixin, View):
         member = GroupMember.objects.get(group=group, user=request.user)
         member_id = member.id
 
-        result = GroupService.remove_member(group, member)
+        result = GroupService.leave_group(group, member)
         channel_layer = get_channel_layer()
 
         if not result.group_deleted:
@@ -206,7 +206,7 @@ class DeleteUserView(LoginRequiredMixin, View):
         members = GroupMember.objects.select_related("group").filter(user=user)
 
         for member in members:
-            GroupService.remove_member(member.group, member)
+            GroupService.leave_group(member.group, member)
 
         user.delete()
 
