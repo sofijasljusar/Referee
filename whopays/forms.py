@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm, PasswordResetForm, SetPasswordForm
-from django.contrib.auth.models import User
 from .models import PayingQueueGroup
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 class SignUpForm(UserCreationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={"class": "mt-3 input-box", "placeholder": "Username"}))
