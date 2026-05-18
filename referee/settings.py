@@ -150,3 +150,5 @@ CHANNEL_LAYERS = {
         "BACKEND": "channels.layers.InMemoryChannelLayer",
     }
 }
+
+AUTH_USER_MODEL = "auth.User"
