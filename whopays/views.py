@@ -272,7 +272,7 @@ class EditUserView(LoginRequiredMixin, UpdateView):
 class DeleteUserView(LoginRequiredMixin, View):
     def post(self, request):
         user = request.user
-        members = GroupMember.objects.select_related("group").filter(user=user)
+        members = list(GroupMember.objects.select_related("group").filter(user=user))
 
         for member in members:
             GroupService.leave_group(
