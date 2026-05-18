@@ -2,10 +2,26 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
-from .models import PayingQueueGroup, GroupMember
+from .models import PayingQueueGroup, GroupMember, UserProfile
 from .services import GroupService
 from channels.layers import get_channel_layer
 from asgiref.sync import async_to_sync
+from .serializers import ThemeColorSerializer
+
+
+class UpdateThemeColorView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = ThemeColorSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        profile, _ = UserProfile.objects.get_or_create(user=request.user)
+        profile.theme_color = serializer.validated_data["theme_color"]
+        profile.save(update_fields=["theme_color"])
+
+        return Response({"status": "ok"})
+
 
 
 class ReorderQueueAPIView(APIView):

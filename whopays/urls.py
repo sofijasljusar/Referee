@@ -36,6 +36,6 @@ urlpatterns = [
     path('api/groups/<str:code>/reorder/', api_views.ReorderQueueAPIView.as_view(), name='api-group-reorder'),
 
     path('settings/', views.SettingsView.as_view(), name='settings'),
-    path('settings/theme/', views.UpdateThemeColorView.as_view(), name="theme-update"),
+    path('settings/theme/', api_views.UpdateThemeColorView.as_view(), name="theme-update"),
 
 ]

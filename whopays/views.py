@@ -3,9 +3,7 @@ from django.contrib.auth.views import LoginView
 from .forms import SignUpForm, LogInForm
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse
-import json
-from .models import UserProfile, PayingQueueGroup, GroupMember
+from .models import PayingQueueGroup, GroupMember
 from .services import GroupService
 from django.shortcuts import redirect
 from django.contrib import messages
@@ -85,23 +83,6 @@ class GroupDetailView(LoginRequiredMixin, DetailView):
 
 class SettingsView(LoginRequiredMixin, TemplateView):
     template_name = "settings.html"
-
-
-class UpdateThemeColorView(LoginRequiredMixin, View):
-    def post(self, request, *args, **kwargs):
-        try:
-            data = json.loads(request.body)
-            color = data.get("theme_color")
-
-            if color and color.startswith("#") and len(color) == 7:
-                profile, _ = UserProfile.objects.get_or_create(user=request.user)
-                profile.theme_color = color
-                profile.save()
-                return JsonResponse({"status": "ok"})
-        except json.JSONDecodeError:
-            pass
-
-        return JsonResponse({"status": "error"}, status=400)
 
 
 class CreateNewGroupView(LoginRequiredMixin, View):
