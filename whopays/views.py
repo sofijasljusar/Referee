@@ -189,7 +189,10 @@ class LeaveGroupView(LoginRequiredMixin, View):
         member = GroupMember.objects.get(group=group, user=request.user)
         member_id = member.id
 
-        result = GroupService.leave_group(group, member)
+        result = GroupService.leave_group(
+            group=group,
+            member=member,
+        )
 
         if not result.group_deleted:
             GroupRealtimeNotifier.member_left(
@@ -272,7 +275,10 @@ class DeleteUserView(LoginRequiredMixin, View):
         members = GroupMember.objects.select_related("group").filter(user=user)
 
         for member in members:
-            GroupService.leave_group(member.group, member)
+            GroupService.leave_group(
+                group=member.group,
+                member=member,
+            )
 
         user.delete()
 

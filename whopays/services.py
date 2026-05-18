@@ -145,3 +145,25 @@ class GroupService:
         next_index = (current_index + 1) % len(members)
         group.paying_state.current_paying_member = members[next_index]
         group.paying_state.save(update_fields=["current_paying_member"])
+
+    @staticmethod
+    @transaction.atomic
+    def reorder_members(group, new_order):
+        members = list(group.members.all())
+        order_map = {member_id: index for index, member_id in enumerate(new_order, start=1)}
+
+        for i, member in enumerate(members):
+            member.order = i + 1000
+
+        GroupMember.objects.bulk_update(members, ["order"])
+
+        for member in members:
+            member.order = order_map[member.id]
+
+        GroupMember.objects.bulk_update(members, ["order"])
+
+
+    @staticmethod
+    def set_current_payer(group, member):
+        group.paying_state.current_paying_member = member
+        group.paying_state.save()
