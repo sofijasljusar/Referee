@@ -40,6 +40,58 @@ class LogInView(LoginView):
         return context
 
 
+class CustomPasswordResetView(PasswordResetView):
+    template_name = "auth/auth.html"
+    form_class = CustomPasswordResetForm
+    email_template_name = "registration/password-reset-email.html"
+    html_email_template_name = "registration/password-reset-email-html.html"
+    subject_template_name = "registration/password-reset-subject.txt"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["title"] = "Reset Password"
+        context["back_url"] = reverse("login")
+        return context
+
+
+class CustomPasswordResetDoneView(PasswordResetDoneView):
+    template_name = "auth/simple-message.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["back_url"] = reverse("login")
+        context["message"] = "Check your email for password reset instructions."
+        return context
+
+
+class CustomPasswordResetConfirmView(PasswordResetConfirmView):
+    form_class = CustomSetPasswordForm
+
+    def get_template_names(self):
+        if self.validlink:
+            return ["auth/auth.html"]
+        return ["auth/simple-message.html"]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["back_url"] = reverse("login")
+        if self.validlink:
+            context["title"] = "Set New Password"
+        else:
+            context["message"] = "This link has already been used or expired."
+        return context
+
+
+class CustomPasswordResetCompleteView(PasswordResetCompleteView):
+    template_name = "auth/simple-message.html"
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["back_url"] = reverse("login")
+        context["message"] = "Your password has been successfully changed. You can now return to the login page."
+        return context
+
+
 class GroupsView(LoginRequiredMixin, ListView):
     model = PayingQueueGroup
     template_name = "groups.html"
@@ -79,10 +131,6 @@ class GroupDetailView(LoginRequiredMixin, DetailView):
             "owner_member_id": group.members.get(user=group.owner).id,
         })
         return context
-
-
-class SettingsView(LoginRequiredMixin, TemplateView):
-    template_name = "settings.html"
 
 
 class CreateNewGroupView(LoginRequiredMixin, View):
@@ -153,87 +201,6 @@ class LeaveGroupView(LoginRequiredMixin, View):
         return redirect("groups")
 
 
-class EditUserView(LoginRequiredMixin, UpdateView):
-    model = User
-    form_class = EditUserForm
-    template_name = "edit-user.html"
-
-    def get_object(self, queryset=None):
-        return self.request.user
-
-    def form_valid(self, form):
-        messages.success(self.request, "Account updated successfully!")
-        return super().form_valid(form)
-
-    def get_success_url(self):
-        return self.request.path
-
-
-class DeleteUserView(LoginRequiredMixin, View):
-    def post(self, request):
-        user = request.user
-        members = GroupMember.objects.select_related("group").filter(user=user)
-
-        for member in members:
-            GroupService.leave_group(member.group, member)
-
-        user.delete()
-
-        return redirect("login")
-
-
-class CustomPasswordResetView(PasswordResetView):
-    template_name = "auth/auth.html"
-    form_class = CustomPasswordResetForm
-    email_template_name = "registration/password-reset-email.html"
-    html_email_template_name = "registration/password-reset-email-html.html"
-    subject_template_name = "registration/password-reset-subject.txt"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["title"] = "Reset Password"
-        context["back_url"] = reverse("login")
-        return context
-
-
-class CustomPasswordResetDoneView(PasswordResetDoneView):
-    template_name = "auth/simple-message.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["back_url"] = reverse("login")
-        context["message"] = "Check your email for password reset instructions."
-        return context
-
-
-class CustomPasswordResetConfirmView(PasswordResetConfirmView):
-    form_class = CustomSetPasswordForm
-
-    def get_template_names(self):
-        if self.validlink:
-            return ["auth/auth.html"]
-        return ["auth/simple-message.html"]
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["back_url"] = reverse("login")
-        if self.validlink:
-            context["title"] = "Set New Password"
-        else:
-            context["message"] = "This link has already been used or expired."
-        return context
-
-
-class CustomPasswordResetCompleteView(PasswordResetCompleteView):
-    template_name = "auth/simple-message.html"
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        context["back_url"] = reverse("login")
-        context["message"] = "Your password has been successfully changed. You can now return to the login page."
-        return context
-
-
 class EditGroupView(LoginRequiredMixin, UpdateView):
     model = PayingQueueGroup
     form_class = EditGroupForm
@@ -278,3 +245,35 @@ class DeleteGroupView(LoginRequiredMixin, View):
 
         return redirect("groups")
 
+
+class SettingsView(LoginRequiredMixin, TemplateView):
+    template_name = "settings.html"
+
+
+class EditUserView(LoginRequiredMixin, UpdateView):
+    model = User
+    form_class = EditUserForm
+    template_name = "edit-user.html"
+
+    def get_object(self, queryset=None):
+        return self.request.user
+
+    def form_valid(self, form):
+        messages.success(self.request, "Account updated successfully!")
+        return super().form_valid(form)
+
+    def get_success_url(self):
+        return self.request.path
+
+
+class DeleteUserView(LoginRequiredMixin, View):
+    def post(self, request):
+        user = request.user
+        members = GroupMember.objects.select_related("group").filter(user=user)
+
+        for member in members:
+            GroupService.leave_group(member.group, member)
+
+        user.delete()
+
+        return redirect("login")
