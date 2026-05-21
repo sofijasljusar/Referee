@@ -21,7 +21,7 @@ class UpdateThemeColorView(APIView):
         profile.theme_color = serializer.validated_data["theme_color"]
         profile.save(update_fields=["theme_color"])
 
-        return Response({"status": "ok"})
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 
@@ -84,16 +84,14 @@ class SetCurrentPayingMember(APIView):
             member_id=member_id,
         )
 
-        return Response({
-            "current_payer_id": member_id,
-        })
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class AdvanceTurnAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request, code):
-        group = PayingQueueGroup.objects.get(code=code)
+        group = get_object_or_404(PayingQueueGroup, code=code)
         current_paying_member = group.paying_state.current_paying_member
 
         if current_paying_member.user != request.user:
@@ -110,6 +108,4 @@ class AdvanceTurnAPIView(APIView):
             member_id=new_current.id,
         )
 
-        return Response({
-            "current_payer_id": new_current.id,
-        })
+        return Response(status=status.HTTP_204_NO_CONTENT)
