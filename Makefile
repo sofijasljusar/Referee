@@ -1,0 +1,2 @@
+run:
+	daphne -p 8000 referee.asgi:application
