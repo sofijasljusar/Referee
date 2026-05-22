@@ -1,7 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from django.db import transaction
 from .models import PayingQueueGroup, UserProfile
 from .services import GroupService
 from .serializers import ThemeColorSerializer, ReorderMembersSerializer, SetCurrentPayerSerializer
@@ -28,7 +27,6 @@ class UpdateThemeColorView(APIView):
 class ReorderQueueAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
-    @transaction.atomic
     def post(self, request, code):
         group = get_object_or_404(PayingQueueGroup, code=code)
 
