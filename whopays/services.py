@@ -65,7 +65,14 @@ class GroupService:
         group.delete()
 
     @staticmethod
+    @transaction.atomic
     def join_group(group, user):
+        group = (
+            PayingQueueGroup.objects
+            .select_for_update()
+            .get(id=group.id)
+        )
+
         last_order = (
             group.members.aggregate(Max("order"))["order__max"]
             or 0
