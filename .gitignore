@@ -1,5 +1,4 @@
 .idea/
-db.sqlite3
 __pycache__/
 staticfiles/
 notes.txt
