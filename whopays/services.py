@@ -92,6 +92,12 @@ class GroupService:
     @staticmethod
     @transaction.atomic
     def leave_group(group, member):
+        group = (
+            PayingQueueGroup.objects
+            .select_for_update()
+            .get(id=group.id)
+        )
+
         remaining_members = list(group.members.exclude(id=member.id))
 
         if not remaining_members:
