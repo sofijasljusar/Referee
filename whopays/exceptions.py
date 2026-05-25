@@ -6,3 +6,6 @@ class EmptyGroupError(Exception):
 
 class GroupCodeGenerationError(Exception):
     pass
+
+class GroupClosed(Exception):
+    pass

@@ -14,7 +14,7 @@ from django.contrib.auth.views import PasswordResetView, PasswordResetDoneView, 
 from .forms import CustomPasswordResetForm
 from django.urls import reverse
 from django.core.exceptions import PermissionDenied
-from .exceptions import GroupCodeGenerationError
+from .exceptions import GroupCodeGenerationError, GroupClosed
 from django.shortcuts import get_object_or_404
 from .notifiers import GroupRealtimeNotifier
 
@@ -164,8 +164,13 @@ class JoinExistingGroupView(LoginRequiredMixin, View):
         except PayingQueueGroup.DoesNotExist:
             messages.error(request, "Group not found.")
             return redirect("groups")
-        user = request.user
-        result = GroupService.join_group(group=group, user=user)
+
+        try:
+            result = GroupService.join_group(group=group, user=request.user)
+        except GroupClosed:
+            messages.error(request, "Group was closed.")
+            return redirect("groups")
+
         created = result.created
         new_member = result.member
 

@@ -1,7 +1,7 @@
 from django.db import transaction, IntegrityError
 from .models import PayingQueueGroup, GroupMember, PayingState
 from .utils import generate_group_code
-from .exceptions import EmptyGroupError, InvalidPayingStateError, GroupCodeGenerationError
+from .exceptions import EmptyGroupError, InvalidPayingStateError, GroupCodeGenerationError, GroupClosed
 from dataclasses import dataclass
 from django.db.models import Max
 
@@ -61,17 +61,27 @@ class GroupService:
     @staticmethod
     @transaction.atomic
     def close_group(group):
+        group = (
+            PayingQueueGroup.objects
+            .select_for_update()
+            .get(id=group.id)
+        )
         group.paying_state.delete()
         group.delete()
 
     @staticmethod
     @transaction.atomic
     def join_group(group, user):
-        group = (
-            PayingQueueGroup.objects
-            .select_for_update()
-            .get(id=group.id)
-        )
+        try:
+            group = (
+                PayingQueueGroup.objects
+                .select_for_update()
+                .get(id=group.id)
+            )
+        except PayingQueueGroup.DoesNotExist:
+            raise GroupClosed(
+                "Cannot join group: group was closed."
+            )
 
         last_order = (
             group.members.aggregate(Max("order"))["order__max"]

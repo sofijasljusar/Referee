@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from ..services import GroupService
 from ..models import GroupMember, PayingQueueGroup
 from .utils import ConcurrentTestCase
+from ..exceptions import GroupClosed
 
 
 class JoinRaceTest(ConcurrentTestCase):
@@ -63,3 +64,36 @@ class LeaveRaceTest(ConcurrentTestCase):
         self.assertFalse(GroupMember.objects.filter(group=self.group).exists())
         self.assertFalse(PayingQueueGroup.objects.filter(id=self.group.id).exists())
 
+
+class CloseJoinRaceTest(ConcurrentTestCase):
+    """
+        Tests race condition between group closing and user joining.
+
+        Expected outcomes:
+        - if join wins the race - both succeed sequentially
+        - if close wins the race - join fails with GroupClosed
+        - no IntegrityError in close or DoesNotExist exception in join
+    """
+
+    reset_sequences = True
+
+    def setUp(self):
+        self.owner = User.objects.create_user("owner")
+        self.new_user = User.objects.create_user("new_user")
+        self.group = GroupService.create_group(owner=self.owner, name="test")
+
+    def test_concurrent_close_join(self):
+        def f1():
+            GroupService.close_group(self.group)
+
+        def f2():
+            GroupService.join_group(
+                group=self.group,
+                user=self.new_user
+            )
+
+        errors = self.run_concurrently([f1, f2])
+        self.assertTrue(
+            not errors or all(isinstance(e, GroupClosed) for e in errors),
+            msg=f"Unexpected errors: {errors}"
+        )
