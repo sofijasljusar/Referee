@@ -100,7 +100,6 @@ class CloseJoinRaceTest(ConcurrentTestCase):
 
 
 class CloseLeaveRaceTest(ConcurrentTestCase):
-
     reset_sequences = True
 
     def setUp(self):
@@ -112,7 +111,7 @@ class CloseLeaveRaceTest(ConcurrentTestCase):
             user=self.user
         ).member
 
-    def test_concurrent_close_join(self):
+    def test_concurrent_close_leave(self):
         def f1():
             GroupService.close_group(self.group)
 
@@ -121,6 +120,32 @@ class CloseLeaveRaceTest(ConcurrentTestCase):
                 group=self.group,
                 member=self.member
             )
+
+        errors = self.run_concurrently([f1, f2])
+        self.assertTrue(
+            not errors or all(isinstance(e, GroupClosed) for e in errors),
+            msg=f"Unexpected errors: {errors}"
+        )
+
+
+class CloseAdvanceRaceTest(ConcurrentTestCase):
+    reset_sequences = True
+
+    def setUp(self):
+        self.owner = User.objects.create_user("owner")
+        self.group = GroupService.create_group(owner=self.owner, name="test")
+        self.user = User.objects.create_user("user")
+        GroupService.join_group(
+            group=self.group,
+            user=self.user
+        )
+
+    def test_concurrent_close_advance(self):
+        def f1():
+            GroupService.close_group(self.group)
+
+        def f2():
+            GroupService.advance_paying_member(self.group)
 
         errors = self.run_concurrently([f1, f2])
         self.assertTrue(

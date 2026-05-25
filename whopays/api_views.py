@@ -7,6 +7,7 @@ from .serializers import ThemeColorSerializer, ReorderMembersSerializer, SetCurr
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .notifiers import GroupRealtimeNotifier
+from .exceptions import GroupClosed
 
 
 class UpdateThemeColorView(APIView):
@@ -97,8 +98,14 @@ class AdvanceTurnAPIView(APIView):
                 {"detail": "Only current paying member can advance turn."},
                 status=status.HTTP_403_FORBIDDEN
             )
+        try:
+            GroupService.advance_paying_member(group)
+        except GroupClosed:
+            return Response(
+                {"detail": "Group was deleted."},
+                status=status.HTTP_409_CONFLICT
+            )
 
-        GroupService.advance_paying_member(group)
         new_current = group.paying_state.current_paying_member
 
         GroupRealtimeNotifier.payer_changed(

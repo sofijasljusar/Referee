@@ -155,7 +155,19 @@ class GroupService:
         GroupMember.objects.bulk_update(to_update, ["order"])
 
     @staticmethod
+    @transaction.atomic
     def advance_paying_member(group):
+        try:
+            group = (
+                PayingQueueGroup.objects
+                .select_for_update()
+                .get(id=group.id)
+            )
+        except PayingQueueGroup.DoesNotExist:
+            raise GroupClosed(
+                "Cannot advance turn: group was closed."
+            )
+
         members = list(group.members.order_by("order"))
         if not members:
             raise EmptyGroupError(
