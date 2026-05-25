@@ -102,11 +102,16 @@ class GroupService:
     @staticmethod
     @transaction.atomic
     def leave_group(group, member):
-        group = (
-            PayingQueueGroup.objects
-            .select_for_update()
-            .get(id=group.id)
-        )
+        try:
+            group = (
+                PayingQueueGroup.objects
+                .select_for_update()
+                .get(id=group.id)
+            )
+        except PayingQueueGroup.DoesNotExist:
+            raise GroupClosed(
+                "Cannot leave group: group was closed."
+            )
 
         remaining_members = list(group.members.exclude(id=member.id))
 

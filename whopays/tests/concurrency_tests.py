@@ -97,3 +97,33 @@ class CloseJoinRaceTest(ConcurrentTestCase):
             not errors or all(isinstance(e, GroupClosed) for e in errors),
             msg=f"Unexpected errors: {errors}"
         )
+
+
+class CloseLeaveRaceTest(ConcurrentTestCase):
+
+    reset_sequences = True
+
+    def setUp(self):
+        self.owner = User.objects.create_user("owner")
+        self.group = GroupService.create_group(owner=self.owner, name="test")
+        self.user = User.objects.create_user("user")
+        self.member = GroupService.join_group(
+            group=self.group,
+            user=self.user
+        ).member
+
+    def test_concurrent_close_join(self):
+        def f1():
+            GroupService.close_group(self.group)
+
+        def f2():
+            GroupService.leave_group(
+                group=self.group,
+                member=self.member
+            )
+
+        errors = self.run_concurrently([f1, f2])
+        self.assertTrue(
+            not errors or all(isinstance(e, GroupClosed) for e in errors),
+            msg=f"Unexpected errors: {errors}"
+        )

@@ -194,10 +194,14 @@ class LeaveGroupView(LoginRequiredMixin, View):
         member = GroupMember.objects.get(group=group, user=request.user)
         member_id = member.id
 
-        result = GroupService.leave_group(
-            group=group,
-            member=member,
-        )
+        try:
+            result = GroupService.leave_group(
+                group=group,
+                member=member,
+            )
+        except GroupClosed:
+            messages.error(request, "Group was closed.")
+            return redirect("groups")
 
         if not result.group_deleted:
             GroupRealtimeNotifier.member_left(
@@ -280,10 +284,13 @@ class DeleteUserView(LoginRequiredMixin, View):
         members = list(GroupMember.objects.select_related("group").filter(user=user))
 
         for member in members:
-            GroupService.leave_group(
-                group=member.group,
-                member=member,
-            )
+            try:
+                GroupService.leave_group(
+                    group=member.group,
+                    member=member,
+                )
+            except GroupClosed:
+                pass
 
         user.delete()
 
