@@ -184,3 +184,48 @@ class JoinAdvanceRaceTest(ConcurrentTestCase):
             group.paying_state.current_paying_member,
             group.members.all()
         )
+
+
+class LeaveAdvanceRaceTest(ConcurrentTestCase):
+    reset_sequences = True
+
+    def setUp(self):
+        self.user1 = User.objects.create_user("u1")
+        self.user2 = User.objects.create_user("u2")
+        self.user3 = User.objects.create_user("u3")
+        self.group = GroupService.create_group(
+            owner=self.user1,
+            name="test"
+        )
+        self.leaving_member = GroupService.join_group(
+            group=self.group,
+            user=self.user2
+        ).member
+        self.next_member = GroupService.join_group(
+            group=self.group,
+            user=self.user3
+        ).member
+
+    def test_concurrent_leave_advance(self):
+        def f1():
+            GroupService.leave_group(
+                group=self.group,
+                member=self.leaving_member
+            )
+
+        def f2():
+            GroupService.advance_paying_member(self.group)
+
+        errors = self.run_concurrently([f1, f2])
+        self.assertFalse(errors)
+
+        group = PayingQueueGroup.objects.get(id=self.group.id)
+        self.assertEqual(group.members.count(), 2)
+        self.assertIn(
+            group.paying_state.current_paying_member,
+            group.members.all()
+        )
+        self.assertEqual(
+            group.paying_state.current_paying_member,
+            self.next_member
+        )
