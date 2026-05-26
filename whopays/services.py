@@ -1,7 +1,7 @@
 from django.db import transaction, IntegrityError
 from .models import PayingQueueGroup, GroupMember, PayingState
 from .utils import generate_group_code
-from .exceptions import EmptyGroupError, InvalidPayingStateError, GroupCodeGenerationError, GroupClosed
+from .exceptions import EmptyGroupError, InvalidPayingStateError, GroupCodeGenerationError, GroupClosed, MemberLeft
 from dataclasses import dataclass
 from django.db.models import Max
 
@@ -123,7 +123,7 @@ class GroupService:
                 owner_member_id=None,
             )
 
-        paying_state = group.paying_state
+        paying_state = PayingState.objects.get(group=group)
         if paying_state.current_paying_member_id == member.id:
             GroupService.advance_paying_member(group)
 
@@ -204,6 +204,17 @@ class GroupService:
 
 
     @staticmethod
+    @transaction.atomic
     def set_current_payer(group, member):
+        group = (
+            PayingQueueGroup.objects
+            .select_for_update()
+            .get(id=group.id)
+        )
+        try:
+            member = GroupMember.objects.get(id=member.id)
+        except GroupMember.DoesNotExist:
+            raise MemberLeft("Cannot set payer: this member left.")
+
         group.paying_state.current_paying_member = member
         group.paying_state.save()

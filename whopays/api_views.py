@@ -7,7 +7,7 @@ from .serializers import ThemeColorSerializer, ReorderMembersSerializer, SetCurr
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .notifiers import GroupRealtimeNotifier
-from .exceptions import GroupClosed
+from .exceptions import GroupClosed, MemberLeft
 
 
 class UpdateThemeColorView(APIView):
@@ -72,11 +72,16 @@ class SetCurrentPayingMember(APIView):
             group.members,
             id=member_id,
         )
-
-        GroupService.set_current_payer(
-            group=group,
-            member=member,
-        )
+        try:
+            GroupService.set_current_payer(
+                group=group,
+                member=member,
+            )
+        except MemberLeft as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_409_CONFLICT
+            )
 
         GroupRealtimeNotifier.payer_changed(
             code=code,

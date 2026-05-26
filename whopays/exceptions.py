@@ -9,3 +9,6 @@ class GroupCodeGenerationError(Exception):
 
 class GroupClosed(Exception):
     pass
+
+class MemberLeft(Exception):
+    pass

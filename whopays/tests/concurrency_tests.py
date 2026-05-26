@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from ..services import GroupService
 from ..models import GroupMember, PayingQueueGroup
 from .utils import ConcurrentTestCase
-from ..exceptions import GroupClosed
+from ..exceptions import GroupClosed, MemberLeft
 
 
 class JoinRaceTest(ConcurrentTestCase):
@@ -228,4 +228,39 @@ class LeaveAdvanceRaceTest(ConcurrentTestCase):
         self.assertEqual(
             group.paying_state.current_paying_member,
             self.next_member
+        )
+
+
+class LeaveSetRaceTest(ConcurrentTestCase):
+    reset_sequences = True
+
+    def setUp(self):
+        self.user1 = User.objects.create_user("u1")
+        self.user2 = User.objects.create_user("u2")
+        self.group = GroupService.create_group(
+            owner=self.user1,
+            name="test"
+        )
+        self.member2 = GroupService.join_group(
+            group=self.group,
+            user=self.user2
+        ).member
+
+    def test_concurrent_leave_set(self):
+        def f1():
+            GroupService.leave_group(
+                group=self.group,
+                member=self.member2
+            )
+
+        def f2():
+            GroupService.set_current_payer(
+                group=self.group,
+                member=self.member2
+            )
+
+        errors = self.run_concurrently([f1, f2])
+        self.assertTrue(
+            not errors or all(isinstance(e, MemberLeft) for e in errors),
+            msg=f"Unexpected errors: {errors}"
         )
