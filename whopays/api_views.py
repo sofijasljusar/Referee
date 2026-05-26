@@ -105,9 +105,9 @@ class AdvanceTurnAPIView(APIView):
             )
         try:
             GroupService.advance_paying_member(group)
-        except GroupClosed:
+        except GroupClosed as e:
             return Response(
-                {"detail": "Group was deleted."},
+                {"detail": str(e)},
                 status=status.HTTP_409_CONFLICT
             )
 

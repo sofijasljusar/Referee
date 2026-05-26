@@ -167,8 +167,8 @@ class JoinExistingGroupView(LoginRequiredMixin, View):
 
         try:
             result = GroupService.join_group(group=group, user=request.user)
-        except GroupClosed:
-            messages.error(request, "Group was closed.")
+        except GroupClosed as e:
+            messages.error(request, str(e))
             return redirect("groups")
 
         created = result.created
@@ -199,8 +199,8 @@ class LeaveGroupView(LoginRequiredMixin, View):
                 group=group,
                 member=member,
             )
-        except GroupClosed:
-            messages.error(request, "Group was closed.")
+        except GroupClosed as e:
+            messages.error(request, str(e))
             return redirect("groups")
 
         if not result.group_deleted:
