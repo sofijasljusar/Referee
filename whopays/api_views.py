@@ -7,7 +7,7 @@ from .serializers import ThemeColorSerializer, ReorderMembersSerializer, SetCurr
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .notifiers import GroupRealtimeNotifier
-from .exceptions import GroupClosed, MemberLeft
+from .exceptions import GroupClosed, MemberLeft, NotCurrentPayer
 
 
 class UpdateThemeColorView(APIView):
@@ -96,19 +96,21 @@ class AdvanceTurnAPIView(APIView):
 
     def post(self, request, code):
         group = get_object_or_404(PayingQueueGroup, code=code)
-        current_paying_member = group.paying_state.current_paying_member
 
-        if current_paying_member.user != request.user:
-            return Response(
-                {"detail": "Only current paying member can advance turn."},
-                status=status.HTTP_403_FORBIDDEN
-            )
         try:
-            GroupService.advance_paying_member(group)
+            GroupService.advance_paying_member(
+                group=group,
+                acting_member=group.members.get(user=self.request.user),
+            )
         except GroupClosed as e:
             return Response(
                 {"detail": str(e)},
                 status=status.HTTP_409_CONFLICT
+            )
+        except NotCurrentPayer as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_403_FORBIDDEN
             )
 
         new_current = group.paying_state.current_paying_member

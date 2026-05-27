@@ -12,3 +12,6 @@ class GroupClosed(Exception):
 
 class MemberLeft(Exception):
     pass
+
+class NotCurrentPayer(Exception):
+    pass

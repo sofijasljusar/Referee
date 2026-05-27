@@ -1,7 +1,14 @@
 from django.db import transaction, IntegrityError
 from .models import PayingQueueGroup, GroupMember, PayingState
 from .utils import generate_group_code
-from .exceptions import EmptyGroupError, InvalidPayingStateError, GroupCodeGenerationError, GroupClosed, MemberLeft
+from .exceptions import (
+    EmptyGroupError,
+    InvalidPayingStateError,
+    GroupCodeGenerationError,
+    GroupClosed,
+    MemberLeft,
+    NotCurrentPayer,
+)
 from dataclasses import dataclass
 from django.db.models import Max
 
@@ -125,7 +132,10 @@ class GroupService:
 
         paying_state = PayingState.objects.get(group=group)
         if paying_state.current_paying_member_id == member.id:
-            GroupService.advance_paying_member(group)
+            GroupService.advance_paying_member(
+                group=group,
+                acting_member=member,
+            )
 
         member.delete()
 
@@ -156,7 +166,7 @@ class GroupService:
 
     @staticmethod
     @transaction.atomic
-    def advance_paying_member(group):
+    def advance_paying_member(group, acting_member):
         try:
             group = (
                 PayingQueueGroup.objects
@@ -168,13 +178,16 @@ class GroupService:
                 "Cannot advance turn: group was closed."
             )
 
+        current = group.paying_state.current_paying_member
+        if current != acting_member:
+            raise NotCurrentPayer()
+
         members = list(group.members.order_by("order"))
         if not members:
             raise EmptyGroupError(
                 "Cannot advance turn: group has no members."
             )
 
-        current = group.paying_state.current_paying_member
         try:
             current_index = members.index(current)
         except ValueError:

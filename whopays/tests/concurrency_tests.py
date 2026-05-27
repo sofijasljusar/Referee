@@ -1,8 +1,8 @@
 from django.contrib.auth.models import User
 from ..services import GroupService
-from ..models import GroupMember, PayingQueueGroup
+from ..models import GroupMember, PayingQueueGroup, PayingState
 from .utils import ConcurrentTestCase
-from ..exceptions import GroupClosed, MemberLeft
+from ..exceptions import GroupClosed, MemberLeft, NotCurrentPayer
 
 
 class JoinRaceTest(ConcurrentTestCase):
@@ -262,5 +262,64 @@ class LeaveSetRaceTest(ConcurrentTestCase):
         errors = self.run_concurrently([f1, f2])
         self.assertTrue(
             not errors or all(isinstance(e, MemberLeft) for e in errors),
+            msg=f"Unexpected errors: {errors}"
+        )
+
+
+class SetAdvanceRaceTest(ConcurrentTestCase):
+    reset_sequences = True
+
+    def setUp(self):
+        self.user1 = User.objects.create_user("u1")
+        self.user2 = User.objects.create_user("u2")
+        self.user3 = User.objects.create_user("u3")
+        self.user4 = User.objects.create_user("u4")
+        self.user5 = User.objects.create_user("u5")
+        self.group = GroupService.create_group(
+            owner=self.user1,
+            name="test"
+        )
+        self.member1 = GroupMember.objects.get(
+            group=self.group,
+            user=self.user1
+        )
+        self.member2 = GroupService.join_group(
+            group=self.group,
+            user=self.user2
+        ).member
+        self.member3 = GroupService.join_group(
+            group=self.group,
+            user=self.user3
+        ).member
+        self.member4 = GroupService.join_group(
+            group=self.group,
+            user=self.user4
+        ).member
+
+        GroupService.advance_paying_member(
+            group=self.group,
+            acting_member=self.member1
+        )
+
+    def test_concurrent_set_advance(self):
+        print("execution")
+        def f1():
+            GroupService.set_current_payer(
+                group=self.group,
+                member=self.member1
+            )
+
+        def f2():
+            GroupService.advance_paying_member(
+                group=self.group,
+                acting_member=self.member2
+            )
+
+        errors = self.run_concurrently([f1, f2])
+        state = PayingState.objects.get(group_id=self.group.id)
+        self.assertTrue(state.current_paying_member == self.member1 or
+                        state.current_paying_member == self.member3)
+        self.assertTrue(
+            not errors or all(isinstance(e, NotCurrentPayer) for e in errors),
             msg=f"Unexpected errors: {errors}"
         )
