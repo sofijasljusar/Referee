@@ -1,6 +1,6 @@
 from django.contrib import admin
 from .models import PayingQueueGroup, GroupMember, PayingState
-
+from .services import GroupService
 
 class GroupMemberInline(admin.TabularInline):
     model = GroupMember
@@ -39,6 +39,9 @@ class PayingStateAdmin(admin.ModelAdmin):
     @admin.action(description="Advance to next payer")
     def advance_paying_member_action(self, request, queryset):
         for state in queryset:
-            state.advance_paying_member()
+            GroupService.advance_paying_member(
+                group=state.group,
+                acting_member=state.current_paying_member,
+            )
         self.message_user(request, "Turn advanced successfully.")
 
