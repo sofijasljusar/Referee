@@ -139,13 +139,20 @@ class CloseAdvanceRaceTest(ConcurrentTestCase):
             group=self.group,
             user=self.user
         )
+        self.member1 = GroupMember.objects.get(
+            group=self.group,
+            user=self.owner
+        )
 
     def test_concurrent_close_advance(self):
         def f1():
             GroupService.close_group(self.group)
 
         def f2():
-            GroupService.advance_paying_member(self.group)
+            GroupService.advance_paying_member(
+                group=self.group,
+                acting_member=self.member1
+            )
 
         errors = self.run_concurrently([f1, f2])
         self.assertTrue(
@@ -164,6 +171,10 @@ class JoinAdvanceRaceTest(ConcurrentTestCase):
             owner=self.owner,
             name="test"
         )
+        self.member1 = GroupMember.objects.get(
+            group=self.group,
+            user=self.owner
+        )
 
     def test_concurrent_join_advance(self):
         def f1():
@@ -173,7 +184,10 @@ class JoinAdvanceRaceTest(ConcurrentTestCase):
             )
 
         def f2():
-            GroupService.advance_paying_member(self.group)
+            GroupService.advance_paying_member(
+                group=self.group,
+                acting_member=self.member1
+            )
 
         errors = self.run_concurrently([f1, f2])
         self.assertFalse(errors)
@@ -197,6 +211,10 @@ class LeaveAdvanceRaceTest(ConcurrentTestCase):
             owner=self.user1,
             name="test"
         )
+        self.member1 = GroupMember.objects.get(
+            group=self.group,
+            user=self.user1
+        )
         self.leaving_member = GroupService.join_group(
             group=self.group,
             user=self.user2
@@ -214,7 +232,10 @@ class LeaveAdvanceRaceTest(ConcurrentTestCase):
             )
 
         def f2():
-            GroupService.advance_paying_member(self.group)
+            GroupService.advance_paying_member(
+                group=self.group,
+                acting_member=self.member1,
+            )
 
         errors = self.run_concurrently([f1, f2])
         self.assertFalse(errors)
