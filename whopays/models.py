@@ -25,7 +25,7 @@ class PayingQueueGroup(models.Model):
     )
 
     def __str__(self):
-        return f"Paying Queue Group '{self.name}' with code: {self.code}."
+        return f"{self.code} - {self.name}"
 
 
 class GroupMember(models.Model):
@@ -49,7 +49,7 @@ class PayingState(models.Model):
     current_paying_member = models.ForeignKey(GroupMember, on_delete=models.PROTECT)
 
     def __str__(self):
-        return f"Current paying member in group {self.group.code}: {self.current_paying_member.user.username}."
+        return f"{self.group.code} - {self.current_paying_member}"
 
 
 class UserProfile(models.Model):

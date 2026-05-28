@@ -2,7 +2,7 @@ from django.contrib.auth.models import User
 from ..services import GroupService
 from ..models import GroupMember, PayingQueueGroup, PayingState
 from .utils import ConcurrentTestCase
-from ..exceptions import GroupClosed, MemberLeft, NotCurrentPayer
+from ..exceptions import GroupClosed, MemberNotInGroup, NotCurrentPayer
 
 
 class JoinRaceTest(ConcurrentTestCase):
@@ -282,7 +282,7 @@ class LeaveSetRaceTest(ConcurrentTestCase):
 
         errors = self.run_concurrently([f1, f2])
         self.assertTrue(
-            not errors or all(isinstance(e, MemberLeft) for e in errors),
+            not errors or all(isinstance(e, MemberNotInGroup) for e in errors),
             msg=f"Unexpected errors: {errors}"
         )
 

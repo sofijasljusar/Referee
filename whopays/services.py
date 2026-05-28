@@ -2,11 +2,9 @@ from django.db import transaction, IntegrityError
 from .models import PayingQueueGroup, GroupMember, PayingState
 from .utils import generate_group_code
 from .exceptions import (
-    EmptyGroupError,
-    InvalidPayingStateError,
     GroupCodeGenerationError,
     GroupClosed,
-    MemberLeft,
+    MemberNotInGroup,
     NotCurrentPayer,
 )
 from dataclasses import dataclass
@@ -179,23 +177,13 @@ class GroupService:
                 "Cannot advance turn: group was closed."
             )
 
-        current = group.paying_state.current_paying_member
-        if current != acting_member:
-            raise NotCurrentPayer()
+        current_payer = group.paying_state.current_paying_member
+        if acting_member != current_payer:
+            raise NotCurrentPayer("Cannot advance turn: acting member is not a current payer.")
 
         members = list(group.members.order_by("order"))
-        if not members:
-            raise EmptyGroupError(
-                "Cannot advance turn: group has no members."
-            )
 
-        try:
-            current_index = members.index(current)
-        except ValueError:
-            raise InvalidPayingStateError(
-                "Cannot advance turn: current payer is not a member of this group."
-            )
-
+        current_index = members.index(current_payer)
         next_index = (current_index + 1) % len(members)
         group.paying_state.current_paying_member = members[next_index]
         group.paying_state.save(update_fields=["current_paying_member"])
@@ -235,9 +223,9 @@ class GroupService:
             .get(id=group.id)
         )
         try:
-            member = GroupMember.objects.get(id=member.id)
+            member = group.members.get(id=member.id)
         except GroupMember.DoesNotExist:
-            raise MemberLeft("Cannot set payer: this member left.")
+            raise MemberNotInGroup("Cannot set payer: this member is not in group.")
 
         group.paying_state.current_paying_member = member
         group.paying_state.save()

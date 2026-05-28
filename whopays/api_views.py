@@ -7,7 +7,7 @@ from .serializers import ThemeColorSerializer, ReorderMembersSerializer, SetCurr
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .notifiers import GroupRealtimeNotifier
-from .exceptions import GroupClosed, MemberLeft, NotCurrentPayer
+from .exceptions import GroupClosed, MemberNotInGroup, NotCurrentPayer
 from django.core.exceptions import ValidationError
 
 
@@ -84,7 +84,7 @@ class SetCurrentPayingMember(APIView):
                 group=group,
                 member=member,
             )
-        except MemberLeft as e:
+        except MemberNotInGroup as e:
             return Response(
                 {"detail": str(e)},
                 status=status.HTTP_409_CONFLICT
