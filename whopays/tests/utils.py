@@ -1,19 +1,20 @@
 from threading import Thread, Barrier
 from django.test import TransactionTestCase
 from django.db import connections
+from queue import Queue
 
 
 class ConcurrentTestCase(TransactionTestCase):
     def run_concurrently(self, funcs):
         barrier = Barrier(len(funcs))
-        errors = []
+        errors = Queue()
 
         def runner(fn):
             try:
                 barrier.wait()
                 fn()
             except Exception as e:
-                errors.append(e)
+                errors.put(e)
             finally:
                 connections.close_all()
 
@@ -28,4 +29,4 @@ class ConcurrentTestCase(TransactionTestCase):
         for thread in threads:
             thread.join()
 
-        return errors
+        return list(errors.queue)
