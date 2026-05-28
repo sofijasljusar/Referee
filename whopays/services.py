@@ -11,6 +11,7 @@ from .exceptions import (
 )
 from dataclasses import dataclass
 from django.db.models import Max
+from django.core.exceptions import ValidationError
 
 
 @dataclass(frozen=True)
@@ -203,6 +204,15 @@ class GroupService:
     @transaction.atomic
     def reorder_members(group, new_order):
         members = list(group.members.all())
+
+        member_ids = {m.id for m in members}
+        new_order_set = set(new_order)
+
+        if new_order_set != member_ids:
+            raise ValidationError(
+                "new_order must contain exactly all group members"
+            )
+
         order_map = {member_id: index for index, member_id in enumerate(new_order, start=1)}
 
         for i, member in enumerate(members):

@@ -8,6 +8,7 @@ from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .notifiers import GroupRealtimeNotifier
 from .exceptions import GroupClosed, MemberLeft, NotCurrentPayer
+from django.core.exceptions import ValidationError
 
 
 class UpdateThemeColorView(APIView):
@@ -40,10 +41,16 @@ class ReorderQueueAPIView(APIView):
         serializer.is_valid(raise_exception=True)
         new_order = serializer.validated_data["new_order"]
 
-        GroupService.reorder_members(
-            group=group,
-            new_order=new_order,
-        )
+        try:
+            GroupService.reorder_members(
+                group=group,
+                new_order=new_order,
+            )
+        except ValidationError as e:
+            return Response(
+                {"detail": str(e)},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
         GroupRealtimeNotifier.queue_reordered(
             code=code,
