@@ -9,7 +9,7 @@ from django.shortcuts import get_object_or_404
 from .notifiers import GroupRealtimeNotifier
 from .exceptions import GroupClosed, MemberNotInGroup, NotCurrentPayer
 from django.core.exceptions import ValidationError
-
+from .permissions import IsGroupOwner
 
 class UpdateThemeColorView(APIView):
     permission_classes = [IsAuthenticated]
@@ -27,16 +27,11 @@ class UpdateThemeColorView(APIView):
 
 
 class ReorderQueueAPIView(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsGroupOwner]
 
     def post(self, request, code):
         group = get_object_or_404(PayingQueueGroup, code=code)
 
-        if group.owner != request.user:
-            return Response(
-                {"detail": "Only owner can reorder queue."},
-                status=status.HTTP_403_FORBIDDEN
-            )
         serializer = ReorderMembersSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
         new_order = serializer.validated_data["new_order"]
@@ -61,16 +56,10 @@ class ReorderQueueAPIView(APIView):
 
 
 class SetCurrentPayingMember(APIView):
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, IsGroupOwner]
 
     def post(self, request, code):
         group = get_object_or_404(PayingQueueGroup, code=code)
-
-        if group.owner != request.user:
-            return Response(
-                {"detail": "Only owner can set current payer."},
-                status=status.HTTP_403_FORBIDDEN
-            )
 
         serializer = SetCurrentPayerSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
