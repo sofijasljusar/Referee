@@ -29,60 +29,6 @@ def test_create_group():
     assert group.members.filter(user=u1).exists()
     assert group.code
 
-# ---------------- ADVANCE ----------------
-
-
-@pytest.mark.django_db
-def test_advance_paying_wraparound():
-    u1 = User.objects.create_user("u1")
-    u2 = User.objects.create_user("u2")
-
-    group = GroupService.create_group(owner=u1, name="test")
-
-    m1 = GroupMember.objects.get(group=group, user=u1)
-    m2 = GroupService.join_group(group=group, user=u2).member
-
-    GroupService.advance_paying_member(group, acting_member=m1)
-    result = GroupService.advance_paying_member(group, acting_member=m2)
-
-    assert result.new_payer_id == m1.id
-
-
-@pytest.mark.django_db
-def test_advance_wrong_actor():
-    u1 = User.objects.create_user("u1")
-    u2 = User.objects.create_user("u2")
-
-    group = GroupService.create_group(owner=u1, name="test")
-
-    m2 = GroupService.join_group(group=group, user=u2).member
-
-    with pytest.raises(NotCurrentPayer):
-        GroupService.advance_paying_member(group=group, acting_member=m2)
-
-
-# ---------------- SET ----------------
-
-
-@pytest.mark.django_db
-def test_set_invalid_member():
-    u1 = User.objects.create_user("u1")
-    u2 = User.objects.create_user("u2")
-
-    group = GroupService.create_group(owner=u1, name="test")
-    other_group = GroupService.create_group(owner=u1, name="test")
-
-    other_group_member = GroupService.join_group(
-        group=other_group,
-        user=u2
-    ).member
-
-    with pytest.raises(MemberNotInGroup):
-        GroupService.set_current_payer(
-            group=group,
-            member=other_group_member
-        )
-
 
 # ---------------- JOIN ----------------
 
@@ -181,6 +127,38 @@ def test_leave_owner_transfer():
    assert group.owner == u2
 
 
+# ---------------- ADVANCE ----------------
+
+
+@pytest.mark.django_db
+def test_advance_paying_wraparound():
+    u1 = User.objects.create_user("u1")
+    u2 = User.objects.create_user("u2")
+
+    group = GroupService.create_group(owner=u1, name="test")
+
+    m1 = GroupMember.objects.get(group=group, user=u1)
+    m2 = GroupService.join_group(group=group, user=u2).member
+
+    GroupService.advance_paying_member(group, acting_member=m1)
+    result = GroupService.advance_paying_member(group, acting_member=m2)
+
+    assert result.new_payer_id == m1.id
+
+
+@pytest.mark.django_db
+def test_advance_wrong_actor():
+    u1 = User.objects.create_user("u1")
+    u2 = User.objects.create_user("u2")
+
+    group = GroupService.create_group(owner=u1, name="test")
+
+    m2 = GroupService.join_group(group=group, user=u2).member
+
+    with pytest.raises(NotCurrentPayer):
+        GroupService.advance_paying_member(group=group, acting_member=m2)
+
+
 # ---------------- REORDER ----------------
 
 
@@ -205,3 +183,26 @@ def test_reorder_validates_input():
 
     with pytest.raises(ValidationError):
         GroupService.reorder_members(group, [10001, 10002, 10003])
+
+
+# ---------------- SET ----------------
+
+
+@pytest.mark.django_db
+def test_set_invalid_member():
+    u1 = User.objects.create_user("u1")
+    u2 = User.objects.create_user("u2")
+
+    group = GroupService.create_group(owner=u1, name="test")
+    other_group = GroupService.create_group(owner=u1, name="test")
+
+    other_group_member = GroupService.join_group(
+        group=other_group,
+        user=u2
+    ).member
+
+    with pytest.raises(MemberNotInGroup):
+        GroupService.set_current_payer(
+            group=group,
+            member=other_group_member
+        )
