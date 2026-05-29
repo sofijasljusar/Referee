@@ -25,6 +25,11 @@ class LeaveGroupResult:
     owner_member_id: int | None
 
 
+@dataclass(frozen=True)
+class AdvancePayerResult:
+    new_payer_id: int
+
+
 class GroupService:
 
     @staticmethod
@@ -129,12 +134,12 @@ class GroupService:
                 owner_member_id=None,
             )
 
-        paying_state = PayingState.objects.get(group=group)
-        if paying_state.current_paying_member_id == member.id:
-            GroupService.advance_paying_member(
+        current_payer_id = PayingState.objects.get(group=group).current_paying_member_id
+        if current_payer_id == member.id:
+            current_payer_id = GroupService.advance_paying_member(
                 group=group,
                 acting_member=member,
-            )
+            ).new_payer_id
 
         member.delete()
 
@@ -147,21 +152,18 @@ class GroupService:
 
         return LeaveGroupResult(
             group_deleted=False,
-            current_payer_id=paying_state.current_paying_member_id,
+            current_payer_id=current_payer_id,
             owner_member_id=owner_member_id,
         )
 
     @staticmethod
     def normalize_member_order(group):
         members = list(group.members.order_by("order"))
-        to_update = []
 
         for index, member in enumerate(members, start=1):
             if member.order != index:
                 member.order = index
-                to_update.append(member)
-
-        GroupMember.objects.bulk_update(to_update, ["order"])
+                member.save(update_fields=["order"])
 
     @staticmethod
     @transaction.atomic
@@ -182,11 +184,16 @@ class GroupService:
             raise NotCurrentPayer("Cannot advance turn: acting member is not a current payer.")
 
         members = list(group.members.order_by("order"))
-
         current_index = members.index(current_payer)
         next_index = (current_index + 1) % len(members)
-        group.paying_state.current_paying_member = members[next_index]
+        new_payer = members[next_index]
+
+        group.paying_state.current_paying_member = new_payer
         group.paying_state.save(update_fields=["current_paying_member"])
+
+        return AdvancePayerResult(
+            new_payer_id=new_payer.id
+        )
 
     @staticmethod
     @transaction.atomic

@@ -105,7 +105,7 @@ class AdvanceTurnAPIView(APIView):
         group = get_object_or_404(PayingQueueGroup, code=code)
 
         try:
-            GroupService.advance_paying_member(
+            result = GroupService.advance_paying_member(
                 group=group,
                 acting_member=group.members.get(user=self.request.user),
             )
@@ -120,11 +120,9 @@ class AdvanceTurnAPIView(APIView):
                 status=status.HTTP_403_FORBIDDEN
             )
 
-        new_current = group.paying_state.current_paying_member
-
         GroupRealtimeNotifier.payer_changed(
             code=code,
-            member_id=new_current.id,
+            member_id=result.new_payer_id,
         )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
