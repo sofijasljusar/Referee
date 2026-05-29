@@ -203,7 +203,10 @@ class GroupService:
         member_ids = {m.id for m in members}
         new_order_set = set(new_order)
 
-        if new_order_set != member_ids:
+        if (
+            new_order_set != member_ids
+            or len(new_order) != len(member_ids)
+        ):
             raise ValidationError(
                 "new_order must contain exactly all group members"
             )

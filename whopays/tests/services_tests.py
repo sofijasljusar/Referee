@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 
 from ..services import GroupService
 from ..models import (
+    PayingState,
     GroupMember,
     PayingQueueGroup
 )
@@ -10,9 +11,23 @@ from ..exceptions import (
     NotCurrentPayer,
     MemberNotInGroup
 )
+from django.core.exceptions import ValidationError
+
 
 User = get_user_model()
 
+
+# ---------------- CREATE GROUP ----------------
+
+
+@pytest.mark.django_db
+def test_create_group():
+    u1 = User.objects.create_user("u1")
+    group = GroupService.create_group(owner=u1, name="test")
+
+    assert PayingState.objects.filter(group=group).exists()
+    assert group.members.filter(user=u1).exists()
+    assert group.code
 
 # ---------------- ADVANCE ----------------
 
@@ -115,13 +130,13 @@ def test_leave_order_normalized():
 
    group = GroupService.create_group(owner=u1, name="test")
    m1 = GroupMember.objects.get(group=group, user=u1)
-   GroupService.join_group(group, u2)
-   GroupService.join_group(group, u3)
+   m2 = GroupService.join_group(group, u2).member
+   m3 = GroupService.join_group(group, u3).member
 
    GroupService.leave_group(group, m1)
 
-   orders = list(group.members.order_by("order").values_list("order", flat=True))
-   assert orders == list(range(1, len(orders) + 1))
+   ordered_ids = list(group.members.order_by("order").values_list("id", flat=True))
+   assert ordered_ids == [m2.id, m3.id]
 
 
 @pytest.mark.django_db
@@ -149,3 +164,44 @@ def test_leave_auto_advance_payer():
     result = GroupService.leave_group(group, m1)
 
     assert result.current_payer_id == m2.id
+
+
+@pytest.mark.django_db
+def test_leave_owner_transfer():
+   u1 = User.objects.create_user("u1")
+   u2 = User.objects.create_user("u2")
+
+   group = GroupService.create_group(owner=u1, name="test")
+   m1 = GroupMember.objects.get(group=group, user=u1)
+   GroupService.join_group(group, u2)
+
+   GroupService.leave_group(group, m1)
+
+   group.refresh_from_db()
+   assert group.owner == u2
+
+
+# ---------------- REORDER ----------------
+
+
+@pytest.mark.django_db
+def test_reorder_validates_input():
+    u1 = User.objects.create_user("u1")
+    u2 = User.objects.create_user("u2")
+    u3 = User.objects.create_user("u3")
+    group = GroupService.create_group(owner=u1, name="test")
+    m1 = GroupMember.objects.get(group=group, user=u1)
+    m2 = GroupService.join_group(group, u2).member
+    m3 = GroupService.join_group(group, u3).member
+
+    with pytest.raises(ValidationError):
+        GroupService.reorder_members(group, [m3.id, m3.id, m2.id, m1.id])
+
+    with pytest.raises(ValidationError):
+        GroupService.reorder_members(group, [m3.id, m2.id])
+
+    with pytest.raises(ValidationError):
+        GroupService.reorder_members(group, [m3.id, m2.id, m1.id, 10000])
+
+    with pytest.raises(ValidationError):
+        GroupService.reorder_members(group, [10001, 10002, 10003])
