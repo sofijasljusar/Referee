@@ -9,7 +9,8 @@ class ThemeColorSerializer(serializers.Serializer):
 
 class ReorderMembersSerializer(serializers.Serializer):
     new_order = serializers.ListField(
-        child=serializers.IntegerField()
+        child=serializers.IntegerField(),
+        allow_empty=False
     )
 
 
