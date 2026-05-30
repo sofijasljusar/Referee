@@ -16,11 +16,12 @@ RUN pip install -r requirements.txt
 # Copy project
 COPY . /app/
 
-# Collect static files
-RUN python manage.py collectstatic --noinput
+# Copy script and make it executable
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Apply database migrations
-RUN python manage.py migrate
+# Run script first when container starts
+ENTRYPOINT ["/entrypoint.sh"]
 
 # Start server
 CMD ["python", "-m", "daphne", "-b", "0.0.0.0", "-p", "8080", "referee.asgi:application"]
