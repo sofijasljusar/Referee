@@ -213,6 +213,18 @@ body.modal-open {
     text-overflow: ellipsis;
 }
 
-#advance-turn-button {
-    -webkit-tap-highlight-color: transparent;
+@media (hover: none) and (pointer: coarse) {
+    /* Disable hover/focus visual glitches */
+    #advance-turn-button:hover,
+    #advance-turn-button:focus,
+    #advance-turn-button:focus-visible {
+        background-color: transparent !important;
+        color: white !important;
+    }
+    /* BUT allow real press feedback */
+    #advance-turn-button:active {
+    background-color: white !important;
+    color: black !important;
+    border-color: white !important;
+    }
 }
