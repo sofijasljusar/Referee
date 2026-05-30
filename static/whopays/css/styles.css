@@ -212,3 +212,12 @@ body.modal-open {
     overflow: hidden;
     text-overflow: ellipsis;
 }
+
+@media (hover: none) and (pointer: coarse) {
+    #advance-turn-button:hover {
+        background: inherit;
+        box-shadow: none;
+        filter: none;
+        transform: none;
+    }
+}
