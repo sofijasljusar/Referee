@@ -220,8 +220,13 @@ class EditGroupView(LoginRequiredMixin, UpdateView):
     slug_field = "code"
     slug_url_kwarg = "code"
 
-    def get_queryset(self):
-        return PayingQueueGroup.objects.filter(owner=self.request.user)
+    def get_object(self, queryset=None):
+        group = super().get_object(queryset)
+
+        if group.owner != self.request.user:
+            raise PermissionDenied
+
+        return group
 
     def get_form_kwargs(self):
         kwargs = super().get_form_kwargs()
@@ -247,7 +252,6 @@ class DeleteGroupView(LoginRequiredMixin, View):
         group = get_object_or_404(
             PayingQueueGroup,
             code=code,
-            members__user=request.user,
         )
 
         if group.owner != request.user:
