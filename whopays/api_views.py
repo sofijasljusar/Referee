@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
-from .models import PayingQueueGroup, UserProfile
+from .models import PayingQueueGroup, UserProfile, GroupMember
 from .services import GroupService
 from .serializers import ThemeColorSerializer, ReorderMembersSerializer, SetCurrentPayerSerializer
 from rest_framework import status
@@ -92,11 +92,12 @@ class AdvanceTurnAPIView(APIView):
 
     def post(self, request, code):
         group = get_object_or_404(PayingQueueGroup, code=code)
+        member = get_object_or_404(group.members, user=request.user)
 
         try:
             result = GroupService.advance_paying_member(
                 group=group,
-                acting_member=group.members.get(user=self.request.user),
+                acting_member=member,
             )
         except GroupClosed as e:
             return Response(
