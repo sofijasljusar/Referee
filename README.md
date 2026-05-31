@@ -8,24 +8,51 @@
 ### Check it out 👉🏻 [Referee](https://site--referee--2sln2j6hvx4f.code.run/)
 
 ## 🔎 Overview
-Mobile-oriented web application focused on clean data modeling and backend workflow design.
-The system is built to be simple and practical, tailored to real user needs.
+Mobile-oriented web application built around a **shared mutable state problem**.
+
+Multiple users interact with the same payment queue simultaneously, 
+requiring consistent state management, real-time synchronization, and protection against race conditions.
 
 ## ✔️ Key Features
-- Group-based interaction using invite codes
-- Owner-controlled group management
-- Consistent state synchronization across multiple clients
-- Instant UI updates via WebSockets (Django Channels)
+- Group-based payment queues using invite codes 
+- Owner-controlled group management 
+- Real-time updates via WebSockets (Django Channels)
+- Automatic owner transfer when the current owner leaves 
+- Consistent state synchronization across connected clients
 
-## 🏛 Architecture & Design
->The backend is built with Django, combining:
->- Django templates for server-rendered views
->- Django REST Framework for API endpoints handling client-side interactions
->- Django Channels for real-time updates via WebSockets
+## ⚙️ Concurrency & Consistency
+*The application manages shared group state where multiple users may perform actions concurrently.* 
 
+> To ensure correctness under concurrent access:
+>- Database transactions (transaction.atomic)
+>- Row-level locking (select_for_update)
+>- Database constraints enforcing queue integrity
+>- Atomic state transitions for queue operations
+>- Explicit handling of concurrent join, leave, close, reorder, and payer-change operations
 
-Key design considerations:
-- Keep the domain model simple and user-focused
-- Designing data models for shared group state and interactions
-- Implementing real-time communication patterns
-- Modular architecture enabling iterative improvements based on user feedback
+> Design goals:
+>- Prevent race conditions
+>- Maintain queue integrity
+>- Guarantee a single source of truth for all connected clients
+
+## 🧪 Testing
+The project includes:
+- Service-layer tests
+- API tests
+- Persistence tests
+- Concurrency tests
+
+Concurrency scenarios were developed using a test-first mindset and validated through multi-threaded transactional
+tests to verify correctness under race conditions.
+
+## 🏛 Architecture
+The backend is built with Django using:
+- Django Templates
+- Django REST Framework
+- Django Channels
+
+Key architectural decisions:
+- Thin views, business logic isolated in a service layer
+- Domain-specific exceptions
+- Event-based real-time notifications
+- Modular design enabling iterative improvements based on user feedback
